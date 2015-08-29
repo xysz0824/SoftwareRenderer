@@ -141,14 +141,19 @@ Canvas SRCreateCanvas(Pixel color)
 	assert(_hasWindow);
 
 	Pixel* buffer = new Pixel[_width * _height];
-	for (int i = 0; i < _width * _height; ++i)
-	{
-		buffer[i].r = color.r;
-		buffer[i].g = color.g;
-		buffer[i].b = color.b;
-	}
 	Canvas canvas = { buffer, _width, _height };
+	SRClearCanvas(canvas, color);
 	return canvas;
+}
+
+void SRClearCanvas(Canvas canvas, Pixel color)
+{
+	for (int i = 0; i < canvas.width * canvas.height; ++i)
+	{
+		canvas.buffer[i].r = color.r;
+		canvas.buffer[i].g = color.g;
+		canvas.buffer[i].b = color.b;
+	}
 }
 
 void SRDrawPoint(Canvas canvas, Vector2 position, Pixel color)
@@ -161,8 +166,8 @@ void SRDrawLine(Canvas canvas, Vector2 start, Vector2 end, Pixel color)
 {
 	float x = start.x;
 	float y = start.y;
-	float dx = end.x - start.x;
-	float dy = end.y - start.y;
+	float dx = abs(end.x - start.x);
+	float dy = abs(end.y - start.y);
 	float stepX = 1;
 	if (start.x > end.x) stepX = -1;
 	float stepY = 1;
@@ -170,47 +175,41 @@ void SRDrawLine(Canvas canvas, Vector2 start, Vector2 end, Pixel color)
 	//Draw start point
 	SRDrawPoint(canvas, start, color);
 	//Bresenham line drawing
-	if (abs(dx) < abs(dy))
+	if (dy < dx)
 	{
 		float p = dx - 2 * dy;
-		while (x < end.x)
+		for (float i = 0; i < dx - 1; ++i)
 		{
 			x += stepX;
-			if (dx > 0)
+			if (p > 0)
+				p += -2 * dy;
+			else
 			{
-				if (p > 0)
-					p += -2 * dy;
-				else
-				{
-					y += stepY;
-					p += 2 * dx - 2 * dy;
-				}
+				y += stepY;
+				p += 2 * dx - 2 * dy;
 			}
 			SRDrawPoint(canvas, Vector2{ x, y }, color);
 		}
 	}
-	else if (abs(dx) > abs(dy))
+	else if (dy > dx)
 	{
 		float p = dy - 2 * dx;
-		while (y < end.y)
+		for (float i = 0; i < dy - 1; ++i)
 		{
 			y += stepY;
-			if (dy > 0)
+			if (p > 0)
+				p += -2 * dx;
+			else
 			{
-				if (p > 0)
-					p += -2 * dx;
-				else
-				{
-					x += stepX;
-					p += 2 * dy - 2 * dx;
-				}
+				x += stepX;
+				p += 2 * dy - 2 * dx;
 			}
 			SRDrawPoint(canvas, Vector2{ x, y }, color);
 		}
 	}
-	else
+	else if (dy == dx)
 	{
-		while (x < end.x)
+		for (float i = 0; i < dx - 1; ++i)
 		{
 			x += stepX;
 			y += stepY;

@@ -8,10 +8,10 @@ class RenderBoard;
 
 HWND	SRCreateWindow(HINSTANCE hInstance, const char* name, int width, int height);
 Canvas	SRCreateCanvas(Pixel color);
+void	SRClearCanvas(Canvas canvas, Pixel color);
 void	SRSetRenderBoard(RenderBoard* renderBoard);
 WPARAM	SRRunWindow(HWND hwnd, int nCmdShow);
 void	SRRender(HDC hdc, Canvas canvas);
-void	SRClearCanvas(Canvas canvas, Pixel color);
 void	SRDrawPoint(Canvas canvas, Vector2 position, Pixel color);
 void	SRDrawLine(Canvas canvas, Vector2 start, Vector2 end, Pixel color);
 void	SRDrawLine(Canvas canvas, Vector2 start, float angle, float length, Pixel color);
