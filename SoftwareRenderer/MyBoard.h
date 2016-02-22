@@ -1,6 +1,5 @@
 #ifndef _MY_BOARD_H
 #define _MY_BOARD_H
-#include "Canvas.h"
 #include "RenderBoard.h"
 
 class MyBoard : public RenderBoard {

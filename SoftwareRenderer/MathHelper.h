@@ -3,6 +3,10 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+struct Vector2 {
+	float x, y;
+};
+
 inline double deg2rad(double degree)
 {
 	return degree / 180.0f * M_PI;

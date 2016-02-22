@@ -1,7 +1,6 @@
 #include <Windows.h>
 #include <stdio.h>
 #include <assert.h>
-#include "MathHelper.h"
 #include "SoftwareRenderer.h"
 #include "RenderBoard.h"
 
@@ -9,7 +8,29 @@ static bool			_hasWindow;
 static int			_width;
 static int			_height;
 static RenderBoard*	_renderBoard = NULL;
-LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	PAINTSTRUCT paintStruct;
+	HDC hdc;
+	int horzRes, vertRes;
+
+	switch (uMsg)
+	{
+	case WM_SIZE:
+		horzRes = LOWORD(lParam);
+		vertRes = HIWORD(lParam);
+		return 0;
+	case WM_PAINT:
+		hdc = BeginPaint(hwnd, &paintStruct);
+		EndPaint(hwnd, &paintStruct);
+		return 0;
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		return 0;
+	}
+	return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
 
 HWND SRCreateWindow(HINSTANCE hInstance, const char* name, int width, int height)
 {
@@ -226,25 +247,17 @@ void SRDrawLine(Canvas canvas, Vector2 start, float angle, float length, Pixel c
 	SRDrawLine(canvas, start, end, color);
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+void	SRDrawTriangle(Canvas canvas, Vector2 vertex[3], Pixel color)
 {
-	PAINTSTRUCT paintStruct;
-	HDC hdc;
-	int horzRes, vertRes;
 
-	switch (uMsg)
-	{
-	case WM_SIZE:
-		horzRes = LOWORD(lParam);
-		vertRes = HIWORD(lParam);
-		return 0;
-	case WM_PAINT:
-		hdc = BeginPaint(hwnd, &paintStruct);
-		EndPaint(hwnd, &paintStruct);
-		return 0;
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		return 0;
-	}
-	return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
+
+void	SRDrawPolygon(Canvas canvas, Vector2 center, int edge, Pixel color)
+{
+
+}
+
+void	SRDrawCircle(Canvas canvas, Vector2 center, float radius, Pixel color)
+{
+
 }

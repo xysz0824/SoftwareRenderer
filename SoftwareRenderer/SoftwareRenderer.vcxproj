@@ -21,7 +21,6 @@
     <ClInclude Include="MyBoard.h" />
     <ClInclude Include="RenderBoard.h" />
     <ClInclude Include="SoftwareRenderer.h" />
-    <ClInclude Include="Vector.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{5AD7F870-E214-47BE-8157-451B56E9FB2F}</ProjectGuid>

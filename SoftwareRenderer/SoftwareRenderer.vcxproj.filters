@@ -44,9 +44,6 @@
     <ClInclude Include="SoftwareRenderer.h">
       <Filter>头文件\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Vector.h">
-      <Filter>头文件\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="MathHelper.h">
       <Filter>头文件\Renderer</Filter>
     </ClInclude>

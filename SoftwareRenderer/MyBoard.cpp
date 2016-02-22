@@ -1,5 +1,4 @@
 #include "MyBoard.h"
-#include "SoftwareRenderer.h"
 
 MyBoard::MyBoard()
 {

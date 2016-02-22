@@ -1,4 +1,3 @@
-#include "SoftwareRenderer.h"
 #include "MyBoard.h"
 
 int WINAPI Main()
