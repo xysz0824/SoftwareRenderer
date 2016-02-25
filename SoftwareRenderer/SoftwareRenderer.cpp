@@ -87,6 +87,11 @@ void SRSetRenderBoard(RenderBoard* renderBoard)
 
 WPARAM SRRunWindow(HWND hwnd, int nCmdShow)
 {
+	static int		msec, fps;
+	static DWORD	d1, d2;
+	static float	dt;
+	static char		str[30] = "0";
+	static int		strLen;
 	assert(_hasWindow);
 
 	ShowWindow(hwnd, nCmdShow);
@@ -103,17 +108,20 @@ WPARAM SRRunWindow(HWND hwnd, int nCmdShow)
 		}
 		else
 		{
-			HDC hdc;
-			hdc = GetDC(hwnd);
-			static DWORD d1, d2;
-			static float dt;
 			d1 = GetTickCount();
+			HDC hdc = GetDC(hwnd);
 			_renderBoard->Render(hdc, dt);
+			if (msec >= 200)
+			{
+				strLen = sprintf_s(str, "%d", fps * (1000 / msec));
+				msec = 0;
+				fps = 0;
+			}
+			TextOut(hdc, 0, 0, str, strLen);
 			d2 = GetTickCount();
-			dt = (d2 - d1) / 1000.0f;
-			char a[30];
-			int len = sprintf_s(a, "%f", dt);
-			TextOut(hdc, 0, 0, a, len);
+			dt = d2 - d1;
+			msec += dt;
+			fps++;
 			ReleaseDC(hwnd, hdc);
 		}
 	}
@@ -130,7 +138,7 @@ void SRRender(HDC hdc, Canvas canvas)
 	HBITMAP hBmp, hOldBmp;	//double buffer
 
 	hMemDC = CreateCompatibleDC(hdc);
-	BYTE bmibuf[sizeof(BITMAPINFO)+256 * sizeof(RGBQUAD)];	//create bitmapinfo buffer
+	BYTE bmibuf[sizeof(BITMAPINFO) + 256 * sizeof(RGBQUAD)];	//create bitmapinfo buffer
 	memset(bmibuf, 0, sizeof(bmibuf));
 	BITMAPINFO* pbmi = (BITMAPINFO*)bmibuf;
 	pbmi->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
@@ -146,9 +154,9 @@ void SRRender(HDC hdc, Canvas canvas)
 	{
 		for (int x = 0; x < _width; ++x)
 		{
-			pBits[(_height - y - 1) * _width * 3 + x * 3 + 2] = canvas.buffer[y * canvas.width + x].r;
-			pBits[(_height - y - 1) * _width * 3 + x * 3 + 1] = canvas.buffer[y * canvas.width + x].g;
-			pBits[(_height - y - 1) * _width * 3 + x * 3	] = canvas.buffer[y * canvas.width + x].b;
+			pBits[(_height - y - 1) * _width * 3 + x * 3 + 2] = canvas.buffer[y * canvas.w + x].r;
+			pBits[(_height - y - 1) * _width * 3 + x * 3 + 1] = canvas.buffer[y * canvas.w + x].g;
+			pBits[(_height - y - 1) * _width * 3 + x * 3	] = canvas.buffer[y * canvas.w + x].b;
 		}
 	}
 	BitBlt(hdc, 0, 0, _width, _height, hMemDC, 0, 0, SRCCOPY);	//output new bitmap to memory
@@ -157,19 +165,18 @@ void SRRender(HDC hdc, Canvas canvas)
 	DeleteDC(hMemDC);
 }
 
-Canvas SRCreateCanvas(Pixel color)
+Canvas SRCreateCanvas()
 {
 	assert(_hasWindow);
 
 	Pixel* buffer = new Pixel[_width * _height];
-	Canvas canvas = { buffer, _width, _height };
-	SRClearCanvas(canvas, color);
+	Canvas canvas = { buffer, 0, 0, _width, _height };
 	return canvas;
 }
 
-void SRClearCanvas(Canvas canvas, Pixel color)
+void SRClearCanvas(Canvas canvas, RGB color)
 {
-	for (int i = 0; i < canvas.width * canvas.height; ++i)
+	for (int i = 0; i < canvas.w * canvas.h; ++i)
 	{
 		canvas.buffer[i].r = color.r;
 		canvas.buffer[i].g = color.g;
@@ -177,14 +184,63 @@ void SRClearCanvas(Canvas canvas, Pixel color)
 	}
 }
 
-void SRDrawPoint(Canvas canvas, Vector2 position, Pixel color)
+void SRDrawPoint(Canvas canvas, Vector2 position, RGB color)
 {
-	Pixel* buffer = canvas.buffer;
-	buffer[int(position.y) * canvas.width + int(position.x)] = color;
+	canvas.buffer[int(position.y) * canvas.w + int(position.x)] = color;
 }
 
-void SRDrawLine(Canvas canvas, Vector2 start, Vector2 end, Pixel color)
+bool SRClipLine(Canvas canvas, Vector2* start, Vector2* end)
 {
+	//Liang-Barsky line clipping
+	float u1 = 0, u2 = 1;
+	float p[4], q[4];
+	float r;
+	p[0] = start->x - end->x;
+	p[1] = end->x - start->x;
+	p[2] = start->y - end->y;
+	p[3] = end->y - start->y;
+
+	q[0] = start->x - canvas.x;
+	q[1] = canvas.x + (canvas.w - 1) - start->x;
+	q[2] = start->y - canvas.y;
+	q[3] = canvas.y + (canvas.h - 1) - start->y;
+
+	for (int i = 0; i < 4; ++i)
+	{
+		r = q[i] / p[i];
+		if (p[i] < 0)
+		{
+			u1 = max(u1, r);
+			if (u1 > u2)
+				return false;
+		}
+		else if (p[i] > 0)
+		{
+			u2 = min(u2, r);
+			if (u1 > u2)
+				return false;
+		}
+		else if (p[i] == 0 && q[i] < 0)
+			return false;
+	}
+	Vector2 resultStart, resultEnd;
+	resultStart.x = start->x + u1 * (end->x - start->x);
+	resultStart.y = start->y + u1 * (end->y - start->y);
+	resultEnd.x = start->x + u2 * (end->x - start->x);
+	resultEnd.y = start->y + u2 * (end->y - start->y);
+	start->x = resultStart.x;
+	start->y = resultStart.y;
+	end->x = resultEnd.x;
+	end->y = resultEnd.y;
+
+	return true;
+}
+
+void SRDrawLine(Canvas canvas, Vector2 start, Vector2 end, RGB color)
+{
+	if (!SRClipLine(canvas, &start, &end))
+		return;
+
 	float x = start.x;
 	float y = start.y;
 	float dx = abs(end.x - start.x);
@@ -239,7 +295,7 @@ void SRDrawLine(Canvas canvas, Vector2 start, Vector2 end, Pixel color)
 	}
 }
 
-void SRDrawLine(Canvas canvas, Vector2 start, float angle, float length, Pixel color)
+void SRDrawLine(Canvas canvas, Vector2 start, float angle, float length, RGB color)
 {
 	Vector2 end = { 
 		start.x + length * float(cos(deg2rad(angle))), 
@@ -247,17 +303,64 @@ void SRDrawLine(Canvas canvas, Vector2 start, float angle, float length, Pixel c
 	SRDrawLine(canvas, start, end, color);
 }
 
-void	SRDrawTriangle(Canvas canvas, Vector2 vertex[3], Pixel color)
+void SRDrawTriangle(Canvas canvas, Vector2 vertex[3], RGB color)
 {
-
+	SRDrawLine(canvas, vertex[0], vertex[1], color);
+	SRDrawLine(canvas, vertex[1], vertex[2], color);
+	SRDrawLine(canvas, vertex[2], vertex[0], color);
 }
 
-void	SRDrawPolygon(Canvas canvas, Vector2 center, int edge, Pixel color)
+void SRDrawPolygon(Canvas canvas, Vector2 center, int edge, float radius, float rotation, RGB color)
 {
+	assert(edge >= 3);
 
+	Vector2 v1, v2;
+	for (int i = 0; i < edge; ++i)
+	{
+		v1.x = center.x + radius * cos(deg2rad(rotation));
+		v1.y = center.y + radius * sin(deg2rad(rotation));
+		rotation += 360.0f / edge;
+		v2.x = center.x + radius * cos(deg2rad(rotation));
+		v2.y = center.y + radius * sin(deg2rad(rotation));
+		SRDrawLine(canvas, v1, v2, color);
+	}
 }
 
-void	SRDrawCircle(Canvas canvas, Vector2 center, float radius, Pixel color)
+void SRDrawCircle(Canvas canvas, Vector2 center, float radius, RGB color)
 {
+	//Bresenham line drawing
+	if (center.x + radius < 0 || center.y + radius < 0 ||
+		center.x - radius >= canvas.x + canvas.w || center.y - radius >= canvas.y + canvas.h)
+		return;
 
+	int x = 0, y = radius;
+	int d = 3 - 2 * radius;
+	while (x <= y)
+	{
+		Vector2 drawPosition[8] = 
+		{ 
+			{ center.x + x, center.y + y }, { center.x - x, center.y + y },
+			{ center.x + x, center.y - y }, { center.x - x, center.y - y },
+			{ center.x + y, center.y + x }, { center.x - y, center.y + x },
+			{ center.x + y, center.y - x }, { center.x - y, center.y - x }
+		};
+		for (int i = 0; i < 8; ++i)
+		{
+			if (drawPosition[i].x >= canvas.x && drawPosition[i].y >= canvas.y &&
+				drawPosition[i].x < canvas.x + canvas.w && drawPosition[i].y < canvas.y + canvas.h)
+			{
+				SRDrawPoint(canvas, drawPosition[i], color);
+			}
+		}
+		if (d < 0)
+		{
+			d = d + 4 * x + 6;
+		}
+		else
+		{
+			d = d + 4 * (x - y) + 10;
+			y--;
+		}
+		x++;
+	}
 }

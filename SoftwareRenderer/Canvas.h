@@ -7,11 +7,11 @@ struct Pixel
 {
 	byte r, g, b;
 };
+typedef Pixel RGB;
 
 struct Canvas
 {
 	Pixel* buffer;
-	int width;
-	int height;
+	int x, y, w, h;
 };
 #endif

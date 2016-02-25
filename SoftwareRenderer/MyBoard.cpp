@@ -12,14 +12,16 @@ MyBoard::~MyBoard()
 
 void MyBoard::Initialize()
 {
-	Pixel color = { 255, 0, 0 };
-	_mainCanvas = SRCreateCanvas(color);
+	_mainCanvas = SRCreateCanvas();
 }
 
 void MyBoard::Render(HDC hdc, float dt)
 {
-	SRClearCanvas(_mainCanvas, Pixel{ 255, 0, 0 });
-	for (float angle = 0; angle < 360; ++angle)
-		SRDrawLine(_mainCanvas, Vector2{ 400, 300 }, angle, 200, Pixel{ 255, 255, 255 });
+	static float a;
+	SRClearCanvas(_mainCanvas, RGB{ 0, 0, 0 });
+	Vector2 center = { 400, 300 };
+	a++;
+	SRDrawPolygon(_mainCanvas, center, 10, a, a, RGB{ 255, 255, 255 });
+	SRDrawCircle(_mainCanvas, center, 200, RGB{ 255, 0, 255 });
 	SRRender(hdc, _mainCanvas);
 }
