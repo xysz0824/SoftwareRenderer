@@ -1,4 +1,3 @@
-#include <Windows.h>
 #include <stdio.h>
 #include <assert.h>
 #include "SoftwareRenderer.h"
@@ -44,7 +43,7 @@ HWND SRCreateWindow(HINSTANCE hInstance, const char* name, int width, int height
 	wndClass.hInstance = hInstance;
 	wndClass.hIcon = NULL;
 	wndClass.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wndClass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
+	wndClass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
 	wndClass.lpszMenuName = name;
 	wndClass.lpszClassName = name;
 
@@ -78,6 +77,15 @@ HWND SRCreateWindow(HINSTANCE hInstance, const char* name, int width, int height
 	_hasWindow = true;
 
 	return hwnd;
+}
+
+int	SRGetWindowWidth()
+{
+	return _width;
+}
+int	SRGetWindowHeight()
+{
+	return _height;
 }
 
 void SRSetRenderBoard(RenderBoard* renderBoard)
@@ -119,8 +127,8 @@ WPARAM SRRunWindow(HWND hwnd, int nCmdShow)
 			}
 			TextOut(hdc, 0, 0, str, strLen);
 			d2 = GetTickCount();
-			dt = d2 - d1;
-			msec += dt;
+			dt = (d2 - d1) / 1000.0f;
+			msec += d2 - d1;
 			fps++;
 			ReleaseDC(hwnd, hdc);
 		}
@@ -135,10 +143,12 @@ void SRRender(HDC hdc, Canvas canvas)
 
 	BYTE *pBits;
 	HDC hMemDC;
-	HBITMAP hBmp, hOldBmp;	//double buffer
+	//double buffer
+	HBITMAP hBmp, hOldBmp;	
 
 	hMemDC = CreateCompatibleDC(hdc);
-	BYTE bmibuf[sizeof(BITMAPINFO) + 256 * sizeof(RGBQUAD)];	//create bitmapinfo buffer
+	//create bitmapinfo buffer
+	BYTE bmibuf[sizeof(BITMAPINFO) + 256 * sizeof(RGBQUAD)];	
 	memset(bmibuf, 0, sizeof(bmibuf));
 	BITMAPINFO* pbmi = (BITMAPINFO*)bmibuf;
 	pbmi->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
@@ -147,30 +157,40 @@ void SRRender(HDC hdc, Canvas canvas)
 	pbmi->bmiHeader.biPlanes = 1;
 	pbmi->bmiHeader.biBitCount = 24;
 	pbmi->bmiHeader.biCompression = BI_RGB;
-	hBmp = CreateDIBSection(hMemDC, pbmi, DIB_RGB_COLORS, (void**)&pBits, 0, 0); //create device-independent bitmap
-	hOldBmp = (HBITMAP)SelectObject(hMemDC, hBmp);	//save the bitmap drawed last time
-	BitBlt(hMemDC, 0, 0, _width, _height, hdc, 0, 0, SRCCOPY);	//output old bitmap to screen
+	//create device-independent bitmap
+	hBmp = CreateDIBSection(hMemDC, pbmi, DIB_RGB_COLORS, (void**)&pBits, 0, 0);
+	//save the bitmap drawed last time
+	hOldBmp = (HBITMAP)SelectObject(hMemDC, hBmp);	
+	//output old bitmap to screen
+	BitBlt(hMemDC, 0, 0, _width, _height, hdc, 0, 0, SRCCOPY);	
 	for (int y = 0; y < _height; ++y)
 	{
 		for (int x = 0; x < _width; ++x)
 		{
-			pBits[(_height - y - 1) * _width * 3 + x * 3 + 2] = canvas.buffer[y * canvas.w + x].r;
-			pBits[(_height - y - 1) * _width * 3 + x * 3 + 1] = canvas.buffer[y * canvas.w + x].g;
-			pBits[(_height - y - 1) * _width * 3 + x * 3	] = canvas.buffer[y * canvas.w + x].b;
+			int bIndex = y * canvas.w + x;
+			int pIndex = (_height - (y + canvas.y) - 1) * _width * 3 + (x + canvas.x) * 3;
+			if (x + canvas.x < 0 || x + canvas.x >= _width ||
+				y + canvas.y < 0 || y + canvas.y >= _height)
+				continue;
+
+			pBits[pIndex + 2] = canvas.buffer[bIndex].r;
+			pBits[pIndex + 1] = canvas.buffer[bIndex].g;
+			pBits[pIndex	] = canvas.buffer[bIndex].b;
 		}
 	}
-	BitBlt(hdc, 0, 0, _width, _height, hMemDC, 0, 0, SRCCOPY);	//output new bitmap to memory
+	//output new bitmap to memory
+	BitBlt(hdc, 0, 0, _width, _height, hMemDC, 0, 0, SRCCOPY);	
 	SelectObject(hMemDC, hOldBmp);
 	DeleteObject(hBmp);
 	DeleteDC(hMemDC);
 }
 
-Canvas SRCreateCanvas()
+Canvas SRCreateCanvas(int x, int y, int w, int h)
 {
 	assert(_hasWindow);
 
 	Pixel* buffer = new Pixel[_width * _height];
-	Canvas canvas = { buffer, 0, 0, _width, _height };
+	Canvas canvas = { buffer, x, y, w, h };
 	return canvas;
 }
 
@@ -200,10 +220,10 @@ bool SRClipLine(Canvas canvas, Vector2* start, Vector2* end)
 	p[2] = start->y - end->y;
 	p[3] = end->y - start->y;
 
-	q[0] = start->x - canvas.x;
-	q[1] = canvas.x + (canvas.w - 1) - start->x;
-	q[2] = start->y - canvas.y;
-	q[3] = canvas.y + (canvas.h - 1) - start->y;
+	q[0] = start->x;
+	q[1] = (canvas.w - 1) - start->x;
+	q[2] = start->y;
+	q[3] = (canvas.h - 1) - start->y;
 
 	for (int i = 0; i < 4; ++i)
 	{
@@ -317,11 +337,11 @@ void SRDrawPolygon(Canvas canvas, Vector2 center, int edge, float radius, float 
 	Vector2 v1, v2;
 	for (int i = 0; i < edge; ++i)
 	{
-		v1.x = center.x + radius * cos(deg2rad(rotation));
-		v1.y = center.y + radius * sin(deg2rad(rotation));
+		v1.x = center.x + radius * (float)cos(deg2rad(rotation));
+		v1.y = center.y + radius * (float)sin(deg2rad(rotation));
 		rotation += 360.0f / edge;
-		v2.x = center.x + radius * cos(deg2rad(rotation));
-		v2.y = center.y + radius * sin(deg2rad(rotation));
+		v2.x = center.x + radius * (float)cos(deg2rad(rotation));
+		v2.y = center.y + radius * (float)sin(deg2rad(rotation));
 		SRDrawLine(canvas, v1, v2, color);
 	}
 }
@@ -330,11 +350,11 @@ void SRDrawCircle(Canvas canvas, Vector2 center, float radius, RGB color)
 {
 	//Bresenham line drawing
 	if (center.x + radius < 0 || center.y + radius < 0 ||
-		center.x - radius >= canvas.x + canvas.w || center.y - radius >= canvas.y + canvas.h)
+		center.x - radius >= canvas.w || center.y - radius >= canvas.h)
 		return;
 
-	int x = 0, y = radius;
-	int d = 3 - 2 * radius;
+	int x = 0, y = (int)radius;
+	int d = 3 - 2 * y;
 	while (x <= y)
 	{
 		Vector2 drawPosition[8] = 
@@ -346,8 +366,8 @@ void SRDrawCircle(Canvas canvas, Vector2 center, float radius, RGB color)
 		};
 		for (int i = 0; i < 8; ++i)
 		{
-			if (drawPosition[i].x >= canvas.x && drawPosition[i].y >= canvas.y &&
-				drawPosition[i].x < canvas.x + canvas.w && drawPosition[i].y < canvas.y + canvas.h)
+			if (drawPosition[i].x >= 0 && drawPosition[i].y >= 0 &&
+				drawPosition[i].x < 0 + canvas.w && drawPosition[i].y < 0 + canvas.h)
 			{
 				SRDrawPoint(canvas, drawPosition[i], color);
 			}

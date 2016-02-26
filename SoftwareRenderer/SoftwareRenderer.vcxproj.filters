@@ -30,6 +30,9 @@
     <ClCompile Include="SoftwareRenderer.cpp">
       <Filter>源文件\Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="MathHelper.cpp">
+      <Filter>源文件\Renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MyBoard.h">

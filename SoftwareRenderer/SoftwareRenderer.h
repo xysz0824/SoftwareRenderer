@@ -7,7 +7,7 @@
 class RenderBoard;
 
 HWND	SRCreateWindow(HINSTANCE hInstance, const char* name, int width, int height);
-Canvas	SRCreateCanvas();
+Canvas	SRCreateCanvas(int x, int y, int w, int h);
 void	SRClearCanvas(Canvas canvas, RGB color);
 void	SRSetRenderBoard(RenderBoard* renderBoard);
 WPARAM	SRRunWindow(HWND hwnd, int nCmdShow);
@@ -19,6 +19,9 @@ void	SRDrawLine(Canvas canvas, Vector2 start, float angle, float length, RGB col
 void	SRDrawTriangle(Canvas canvas, Vector2 vertex[3], RGB color);
 void	SRDrawPolygon(Canvas canvas, Vector2 center, int edge, float radius, float rotation, RGB color);
 void	SRDrawCircle(Canvas canvas, Vector2 center, float radius, RGB color);
+
+int		SRGetWindowWidth();
+int		SRGetWindowHeight();
 
 #define Main() WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
 #endif

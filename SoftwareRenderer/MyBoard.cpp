@@ -12,7 +12,12 @@ MyBoard::~MyBoard()
 
 void MyBoard::Initialize()
 {
-	_mainCanvas = SRCreateCanvas();
+	_mainCanvas = SRCreateCanvas(0, 0, SRGetWindowWidth(), SRGetWindowHeight());
+	Matrix a = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+	Matrix b = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+	Matrix c = madd(a, b);
+	Matrix d = msub(a, b);
+	Matrix e = mmul(a, b);
 }
 
 void MyBoard::Render(HDC hdc, float dt)

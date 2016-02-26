@@ -1,6 +1,5 @@
 #ifndef _RENDER_BOARD_H
 #define _RENDER_BOARD_H
-#include <Windows.h>
 #include "SoftwareRenderer.h"
 
 class RenderBoard {
