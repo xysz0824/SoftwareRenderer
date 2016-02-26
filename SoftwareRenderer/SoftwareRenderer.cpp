@@ -6,6 +6,7 @@
 static bool			_hasWindow;
 static int			_width;
 static int			_height;
+static Matrix		_camera;
 static RenderBoard*	_renderBoard = NULL;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
