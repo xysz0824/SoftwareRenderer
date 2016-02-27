@@ -6,6 +6,9 @@
 static bool			_hasWindow;
 static int			_width;
 static int			_height;
+static BYTE*		_bits;
+static HDC			_memDC;
+static HBITMAP		_bitmap;
 static Matrix		_camera;
 static RenderBoard*	_renderBoard = NULL;
 
@@ -135,6 +138,12 @@ WPARAM SRRunWindow(HWND hwnd, int nCmdShow)
 		}
 	}
 
+	if (_memDC)
+	{
+		DeleteObject(_bitmap);
+		DeleteDC(_memDC);
+	}
+
 	return msg.wParam;
 }
 
@@ -142,28 +151,23 @@ void SRRender(HDC hdc, Canvas canvas)
 {
 	assert(_hasWindow);
 
-	BYTE *pBits;
-	HDC hMemDC;
-	//double buffer
-	HBITMAP hBmp, hOldBmp;	
-
-	hMemDC = CreateCompatibleDC(hdc);
-	//create bitmapinfo buffer
-	BYTE bmibuf[sizeof(BITMAPINFO) + 256 * sizeof(RGBQUAD)];	
-	memset(bmibuf, 0, sizeof(bmibuf));
-	BITMAPINFO* pbmi = (BITMAPINFO*)bmibuf;
-	pbmi->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-	pbmi->bmiHeader.biWidth = _width;
-	pbmi->bmiHeader.biHeight = _height;
-	pbmi->bmiHeader.biPlanes = 1;
-	pbmi->bmiHeader.biBitCount = 24;
-	pbmi->bmiHeader.biCompression = BI_RGB;
-	//create device-independent bitmap
-	hBmp = CreateDIBSection(hMemDC, pbmi, DIB_RGB_COLORS, (void**)&pBits, 0, 0);
-	//save the bitmap drawed last time
-	hOldBmp = (HBITMAP)SelectObject(hMemDC, hBmp);	
-	//output old bitmap to screen
-	BitBlt(hMemDC, 0, 0, _width, _height, hdc, 0, 0, SRCCOPY);	
+	if (_memDC == NULL)
+	{
+		_memDC = CreateCompatibleDC(hdc);
+		//create bitmapinfo buffer
+		BYTE bmibuf[sizeof(BITMAPINFO) + 256 * sizeof(RGBQUAD)];
+		memset(bmibuf, 0, sizeof(bmibuf));
+		BITMAPINFO* pbmi = (BITMAPINFO*)bmibuf;
+		pbmi->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+		pbmi->bmiHeader.biWidth = _width;
+		pbmi->bmiHeader.biHeight = _height;
+		pbmi->bmiHeader.biPlanes = 1;
+		pbmi->bmiHeader.biBitCount = 24;
+		pbmi->bmiHeader.biCompression = BI_RGB;
+		//create device-independent bitmap
+		_bitmap = CreateDIBSection(_memDC, pbmi, DIB_RGB_COLORS, (void**)&_bits, 0, 0);
+		SelectObject(_memDC, _bitmap);
+	}
 	for (int y = 0; y < _height; ++y)
 	{
 		for (int x = 0; x < _width; ++x)
@@ -174,16 +178,13 @@ void SRRender(HDC hdc, Canvas canvas)
 				y + canvas.y < 0 || y + canvas.y >= _height)
 				continue;
 
-			pBits[pIndex + 2] = canvas.buffer[bIndex].r;
-			pBits[pIndex + 1] = canvas.buffer[bIndex].g;
-			pBits[pIndex	] = canvas.buffer[bIndex].b;
+			_bits[pIndex + 2] = canvas.buffer[bIndex].r;
+			_bits[pIndex + 1] = canvas.buffer[bIndex].g;
+			_bits[pIndex] = canvas.buffer[bIndex].b;
 		}
 	}
 	//output new bitmap to memory
-	BitBlt(hdc, 0, 0, _width, _height, hMemDC, 0, 0, SRCCOPY);	
-	SelectObject(hMemDC, hOldBmp);
-	DeleteObject(hBmp);
-	DeleteDC(hMemDC);
+	BitBlt(hdc, 0, 0, _width, _height, _memDC, 0, 0, SRCCOPY);
 }
 
 Canvas SRCreateCanvas(int x, int y, int w, int h)
