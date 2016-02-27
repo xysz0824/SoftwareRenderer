@@ -50,5 +50,8 @@
     <ClInclude Include="MathHelper.h">
       <Filter>头文件\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics.h">
+      <Filter>头文件\Renderer</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

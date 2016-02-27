@@ -9,7 +9,8 @@ static int			_height;
 static BYTE*		_bits;
 static HDC			_memDC;
 static HBITMAP		_bitmap;
-static Matrix		_camera;
+static Matrix		_view;
+static Matrix		_projection;
 static RenderBoard*	_renderBoard = NULL;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -385,4 +386,133 @@ void SRDrawCircle(Canvas canvas, Vector2 center, float radius, RGB color)
 		}
 		x++;
 	}
+}
+Matrix SRCreateTranslation(Vector3 position)
+{
+	float x = position.x;
+	float y = position.y;
+	float z = position.z;
+	Matrix translation =
+	{
+		1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		x, y, z, 1
+	};
+	return translation;
+}
+
+Matrix SRCreateRotateX(float angle)
+{
+	float rad = (float)deg2rad(angle);
+	float c = cos(rad);
+	float s = sin(rad);
+	Matrix rotate = 
+	{
+		1, 0, 0, 0,
+		0, c, s, 0,
+		0,-s, c, 0,
+		0, 0, 0, 1
+	};
+	return rotate;
+}
+
+Matrix SRCreateRotateY(float angle)
+{
+	float rad = (float)deg2rad(angle);
+	float c = cos(rad);
+	float s = sin(rad);
+	Matrix rotate =
+	{
+		c, 0,-s, 0,
+		0, 1, 0, 0,
+		s, 0, c, 0,
+		0, 0, 0, 1
+	};
+	return rotate;
+}
+
+Matrix SRCreateRotateZ(float angle)
+{
+	float rad = (float)deg2rad(angle);
+	float c = cos(rad);
+	float s = sin(rad);
+	Matrix rotate =
+	{
+		c, s, 0, 0,
+	   -s, c, 0, 0,
+		0, 0, 1, 0,
+		0, 0, 0, 1
+	};
+	return rotate;
+}
+
+Matrix SRCreateScaling(Vector3 scale)
+{
+	float sx = scale.x;
+	float sy = scale.y;
+	float sz = scale.z;
+	Matrix scaling =
+	{
+		sx, 0, 0, 0,
+		 0,sy, 0, 0,
+		 0, 0,sz, 0,
+		 0, 0, 0, 1
+	};
+	return scaling;
+}
+
+Matrix SRCreateViewToLH(Vector3 position, Vector3 direction, Vector3 up)
+{
+	//Calculate d
+	Vector3 d = v3normalize(direction);
+	//Calculate r
+	Vector3 r = v3cross(up, d);
+	r = v3normalize(r);
+	//Calculate u
+	Vector3 u = v3cross(r, d);
+	u = v3normalize(u);
+	//Fill the view matrix
+	float pr = -v3dot(position, r);
+	float pu = -v3dot(position, u);
+	float pd = -v3dot(position, d);
+	Matrix view =
+	{
+		r.x, u.x, d.x, 0,
+		r.y, u.y, d.y, 0,
+		r.z, u.z, d.z, 0,
+		pr,  pu,  pd,  1
+	};
+	return view;
+}
+
+Matrix SRCreatePerspectiveLH(float fieldofView, float aspectRadio, float zNear, float zFar)
+{
+	float ys = 1.0f / tan(fieldofView / 2.0f);
+	float xs = ys / aspectRadio;
+	float za = zFar / (zFar - zNear);
+	float zb = (zNear * zFar) / (zNear - zFar);
+	Matrix perspective = 
+	{
+		xs, 0 , 0 , 0 ,
+		0 , ys, 0 , 0 ,
+		0 , 0 , za, 1 ,
+		0 , 0 , zb, 0
+	};
+	return perspective;
+}
+
+Matrix SRCreateViewAtLH(Vector3 position, Vector3 target, Vector3 up)
+{
+	return SRCreateViewToLH(position, v3sub(target, position), up);
+}
+
+void SRSetView(Matrix view)
+{
+	_view = view;
+}
+
+void SRSetProjection(Matrix projection)
+{
+	_projection = projection;
 }

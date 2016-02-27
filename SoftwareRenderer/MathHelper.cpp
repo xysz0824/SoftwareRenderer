@@ -50,3 +50,13 @@ Matrix msub(Matrix a, Matrix b)
 	}
 	return r;
 }
+
+Vector4 v4mul(Vector4 v, Matrix m)
+{
+	Vector4 r;
+	r.x = v.x * m._11 + v.y * m._21 + v.z * m._31 + v.w * m._41;
+	r.y = v.x * m._12 + v.y * m._22 + v.z * m._32 + v.w * m._42;
+	r.z = v.x * m._13 + v.y * m._23 + v.z * m._33 + v.w * m._43;
+	r.w = v.x * m._14 + v.y * m._24 + v.z * m._34 + v.w * m._44;
+	return r;
+}

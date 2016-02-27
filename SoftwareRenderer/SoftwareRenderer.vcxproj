@@ -18,6 +18,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Canvas.h" />
+    <ClInclude Include="Graphics.h" />
     <ClInclude Include="MathHelper.h" />
     <ClInclude Include="MyBoard.h" />
     <ClInclude Include="RenderBoard.h" />
