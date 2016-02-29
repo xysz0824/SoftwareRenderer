@@ -10,5 +10,6 @@ public:
 	virtual void Render(HDC hdc, float dt);
 private:
 	Canvas _mainCanvas;
+	Object _cube;
 };
 #endif

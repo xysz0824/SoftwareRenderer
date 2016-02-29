@@ -32,6 +32,8 @@ Matrix	SRCreatePerspectiveLH(float fieldofView, float aspectRadio, float zNear, 
 void	SRSetView(Matrix view);
 void	SRSetProjection(Matrix projection);
 void	SRDrawLine3D(Canvas canvas, Vector3 start, Vector3 end, RGB color);
+Object	SRCreateCube(Vector3 position, Vector3 eulerAngle, float side);
+void	SRDrawWireFrame(Canvas canvas, Object object, RGB color);
 
 int		SRGetWindowWidth();
 int		SRGetWindowHeight();
