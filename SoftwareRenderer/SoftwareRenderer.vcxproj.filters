@@ -38,9 +38,6 @@
     <ClInclude Include="MyBoard.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Canvas.h">
-      <Filter>头文件\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="RenderBoard.h">
       <Filter>头文件\Renderer</Filter>
     </ClInclude>

@@ -321,8 +321,8 @@ void SRDrawLine(Canvas canvas, Vector2 start, Vector2 end, RGB color)
 void SRDrawLine(Canvas canvas, Vector2 start, float angle, float length, RGB color)
 {
 	Vector2 end = { 
-		start.x + length * float(cos(deg2rad(angle))), 
-		start.y + length * float(sin(deg2rad(angle))) };
+		start.x + length * float(cos(angle)), 
+		start.y + length * float(sin(angle)) };
 	SRDrawLine(canvas, start, end, color);
 }
 
@@ -340,11 +340,11 @@ void SRDrawPolygon(Canvas canvas, Vector2 center, int edge, float radius, float 
 	Vector2 v1, v2;
 	for (int i = 0; i < edge; ++i)
 	{
-		v1.x = center.x + radius * (float)cos(deg2rad(rotation));
-		v1.y = center.y + radius * (float)sin(deg2rad(rotation));
-		rotation += 360.0f / edge;
-		v2.x = center.x + radius * (float)cos(deg2rad(rotation));
-		v2.y = center.y + radius * (float)sin(deg2rad(rotation));
+		v1.x = center.x + radius * (float)cos(rotation);
+		v1.y = center.y + radius * (float)sin(rotation);
+		rotation += (float)deg2rad(360.0f / edge);
+		v2.x = center.x + radius * (float)cos(rotation);
+		v2.y = center.y + radius * (float)sin(rotation);
 		SRDrawLine(canvas, v1, v2, color);
 	}
 }
@@ -404,9 +404,8 @@ Matrix SRCreateTranslation(Vector3 position)
 
 Matrix SRCreateRotateX(float angle)
 {
-	float rad = (float)deg2rad(angle);
-	float c = cos(rad);
-	float s = sin(rad);
+	float c = cos(angle);
+	float s = sin(angle);
 	Matrix rotate = 
 	{
 		1, 0, 0, 0,
@@ -419,9 +418,8 @@ Matrix SRCreateRotateX(float angle)
 
 Matrix SRCreateRotateY(float angle)
 {
-	float rad = (float)deg2rad(angle);
-	float c = cos(rad);
-	float s = sin(rad);
+	float c = cos(angle);
+	float s = sin(angle);
 	Matrix rotate =
 	{
 		c, 0,-s, 0,
@@ -434,9 +432,8 @@ Matrix SRCreateRotateY(float angle)
 
 Matrix SRCreateRotateZ(float angle)
 {
-	float rad = (float)deg2rad(angle);
-	float c = cos(rad);
-	float s = sin(rad);
+	float c = cos(angle);
+	float s = sin(angle);
 	Matrix rotate =
 	{
 		c, s, 0, 0,
@@ -486,6 +483,11 @@ Matrix SRCreateViewToLH(Vector3 position, Vector3 direction, Vector3 up)
 	return view;
 }
 
+Matrix SRCreateViewAtLH(Vector3 position, Vector3 target, Vector3 up)
+{
+	return SRCreateViewToLH(position, v3sub(target, position), up);
+}
+
 Matrix SRCreatePerspectiveLH(float fieldofView, float aspectRadio, float zNear, float zFar)
 {
 	float ys = 1.0f / tan(fieldofView / 2.0f);
@@ -502,11 +504,6 @@ Matrix SRCreatePerspectiveLH(float fieldofView, float aspectRadio, float zNear, 
 	return perspective;
 }
 
-Matrix SRCreateViewAtLH(Vector3 position, Vector3 target, Vector3 up)
-{
-	return SRCreateViewToLH(position, v3sub(target, position), up);
-}
-
 void SRSetView(Matrix view)
 {
 	_view = view;
@@ -515,4 +512,23 @@ void SRSetView(Matrix view)
 void SRSetProjection(Matrix projection)
 {
 	_projection = projection;
+}
+
+void SRDrawLine3D(Canvas canvas, Vector3 start, Vector3 end, RGB color)
+{
+	Vector4 v4Start = { start.x, start.y, start.z, 1 };
+	Vector4 v4End	= { end.x, end.y, end.z, 1 };
+	//Transform world space to view space
+	v4Start = v4mul(v4Start, _view);
+	v4End = v4mul(v4End, _view);
+	//Transform view space to projection space
+	v4Start = v4mul(v4Start, _projection);
+	v4End = v4mul(v4End, _projection);
+	//Transform homogeneous coordinates to point coordinates
+	v4Start = v4div(v4Start, v4Start.w);
+	v4End = v4div(v4End, v4End.w);
+	//Transform projection space to canvas space
+	Vector2 v2Start = Vector2{ (v4Start.x + 1) / 2.0f * _width, (v4Start.y + 1) / 2.0f * _height };
+	Vector2 v2End = Vector2{ (v4End.x + 1) / 2.0f * _width, (v4End.y + 1) / 2.0f * _height };
+	SRDrawLine(canvas, v2Start, v2End, color);
 }

@@ -19,7 +19,7 @@ inline Vector3 v3sub(Vector3 a, Vector3 b)
 }
 inline Vector3 v3cross(Vector3 a, Vector3 b)
 {
-	return Vector3{ a.y * b.z - b.y * a.z, a.z * b.x - b.z - a.x, a.x * b.y - b.x * a.y };
+	return Vector3{ a.y * b.z - b.y * a.z, a.z * b.x - b.z * a.x, a.x * b.y - b.x * a.y };
 }
 inline float v3dot(Vector3 a, Vector3 b)
 {
@@ -28,7 +28,7 @@ inline float v3dot(Vector3 a, Vector3 b)
 inline Vector3 v3normalize(Vector3 v)
 {
 	float length = sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
-	return Vector3{ v.x / length, v.y / length, v.z / length };
+	return length == 0.0f ? v : Vector3{ v.x / length, v.y / length, v.z / length };
 }
 
 struct Matrix {
@@ -52,6 +52,10 @@ struct Vector4 {
 	float x, y, z, w;
 };
 Vector4 v4mul(Vector4 v, Matrix m);
+inline Vector4 v4div(Vector4 v, float n)
+{
+	return Vector4{ v.x / n, v.y / n, v.z / n, v.w / n };
+}
 
 inline double deg2rad(double degree)
 {
