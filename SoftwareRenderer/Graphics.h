@@ -31,4 +31,10 @@ struct Object
 	Vector3 eulerAngle;
 	Vector3 scale;
 };
+
+struct Texture
+{
+	Pixel* data;
+	int w, h;
+};
 #endif

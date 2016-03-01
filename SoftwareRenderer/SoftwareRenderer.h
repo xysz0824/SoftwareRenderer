@@ -34,6 +34,8 @@ void	SRSetProjection(Matrix projection);
 void	SRDrawLine3D(Canvas canvas, Vector3 start, Vector3 end, RGB color);
 Object	SRCreateCube(Vector3 position, Vector3 eulerAngle, float side);
 void	SRDrawWireFrame(Canvas canvas, Object object, RGB color);
+Texture	SRLoadBitmap24(const char* path);
+void	SRDrawBitmap(Canvas canvas, Texture texture);
 
 int		SRGetWindowWidth();
 int		SRGetWindowHeight();

@@ -58,6 +58,11 @@ HWND SRCreateWindow(HINSTANCE hInstance, const char* name, int width, int height
 		return NULL;
 	}
 
+	//Get correct window rect
+	RECT rect;
+	SetRect(&rect, 0, 0, width, height);
+	AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW & ~WS_MAXIMIZEBOX & ~WS_THICKFRAME, false);
+
 	//Create normal window
 	HWND hwnd = CreateWindow(
 		name,									//window class name
@@ -66,8 +71,8 @@ HWND SRCreateWindow(HINSTANCE hInstance, const char* name, int width, int height
 		~WS_MAXIMIZEBOX & ~WS_THICKFRAME,		//window style
 		CW_USEDEFAULT,							//initial x position
 		CW_USEDEFAULT,							//initial y position
-		width,									//initial x size
-		height,									//initial y size
+		rect.right - rect.left,					//initial x size
+		rect.bottom - rect.top,					//initial y size
 		NULL,									//parent window handle
 		NULL,									//window menu handle
 		hInstance,								//program instance handle
@@ -608,5 +613,63 @@ void SRDrawWireFrame(Canvas canvas, Object object, RGB color)
 			points[j] = Vector2{ (v4Current.x + 1) / 2.0f * _width, (v4Current.y + 1) / 2.0f * _height };
 		}
 		SRDrawTriangle(canvas, points, color);
+	}
+}
+
+#pragma pack(1)
+Texture	SRLoadBitmap24(const char* path)
+{
+	Texture tex;
+	tex.data = NULL;
+	FILE* file;
+	fopen_s(&file, path, "rb");
+	assert(file);
+	struct BITMAPFILEHEADER
+	{
+		WORD bfType;
+		DWORD bfSize;
+		WORD bfReserved1;
+		WORD bfReserved2;
+		DWORD bfOffBits;
+	} fileHeader;
+	fread(&fileHeader, sizeof(BITMAPFILEHEADER), 1, file);
+	struct BITMAPINFOHEADER{
+		DWORD biSize;
+		LONG biWidth;
+		LONG biHeight;
+		WORD biPlanes;
+		WORD biBitCount;
+		DWORD biCompression;
+		DWORD biSizeImage;
+		LONG biXPelsPerMeter;
+		LONG biYPelsPerMeter;
+		DWORD biClrUsed;
+		DWORD biClrImportant;
+	} infoHeader;
+	fread(&infoHeader, sizeof(BITMAPINFOHEADER), 1, file);
+	tex.w = infoHeader.biWidth;
+	tex.h = infoHeader.biHeight;
+	tex.data = new Pixel[tex.w * tex.h];
+	for (int i = 0; i < tex.w * tex.h; ++i)
+	{
+		long cur = ftell(file);
+		fread(&tex.data[i], sizeof(Pixel), 1, file);
+		byte temp = tex.data[i].b;
+		tex.data[i].b = tex.data[i].r;
+		tex.data[i].r = temp;
+	}
+	fclose(file);
+	return tex;
+}
+#pragma pack()
+
+void SRDrawBitmap(Canvas canvas, Texture texture)
+{
+	for (int x = 0; x < texture.w; ++x)
+	{
+		for (int y = 0; y < texture.h; ++y)
+		{
+			canvas.buffer[y * canvas.w + x] = texture.data[(texture.h - y - 1) * texture.w + x];
+		}
 	}
 }

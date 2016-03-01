@@ -9,7 +9,8 @@ public:
 	virtual void Initialize();
 	virtual void Render(HDC hdc, float dt);
 private:
-	Canvas _mainCanvas;
-	Object _cube;
+	Canvas	_mainCanvas;
+	Object	_cube;
+	Texture _tex;
 };
 #endif
