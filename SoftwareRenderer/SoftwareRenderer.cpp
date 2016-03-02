@@ -11,6 +11,7 @@ static HDC			_memDC;
 static HBITMAP		_bitmap;
 static Matrix		_view;
 static Matrix		_projection;
+static Texture		_texture;
 static RenderBoard*	_renderBoard = NULL;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -543,30 +544,30 @@ Object SRCreateCube(Vector3 position, Vector3 eulerAngle, float side)
 	Object cube;
 	cube.totalVertex = 24;
 	cube.mesh = new Vertex[cube.totalVertex];
-	cube.mesh[0] = { Vector3{ -0.5f, -0.5f, -0.5f }, Vector2{ 0, 1 } };
-	cube.mesh[1] = { Vector3{ -0.5f, 0.5f, -0.5f }, Vector2{ 0, 0 } };
-	cube.mesh[2] = { Vector3{ 0.5f, 0.5f, -0.5f }, Vector2{ 1, 0 } };
-	cube.mesh[3] = { Vector3{ 0.5f, -0.5f, -0.5f }, Vector2{ 1, 1 } };
-	cube.mesh[4] = { Vector3{ -0.5f, -0.5f, 0.5f }, Vector2{ 0, 1 } };
-	cube.mesh[5] = { Vector3{ -0.5f, 0.5f, 0.5f }, Vector2{ 0, 0 } };
-	cube.mesh[6] = { Vector3{ -0.5f, 0.5f, -0.5f }, Vector2{ 1, 0 } };
-	cube.mesh[7] = { Vector3{ -0.5f, -0.5f, -0.5f }, Vector2{ 1, 1 } };
-	cube.mesh[8] = { Vector3{ 0.5f, -0.5f, 0.5f }, Vector2{ 0, 1 } };
-	cube.mesh[9] = { Vector3{ 0.5f, 0.5f, 0.5f }, Vector2{ 0, 0 } };
-	cube.mesh[10] = { Vector3{ -0.5f, 0.5f, 0.5f }, Vector2{ 1, 0 } };
-	cube.mesh[11] = { Vector3{ -0.5f, -0.5f, 0.5f }, Vector2{ 1, 1 } };
-	cube.mesh[12] = { Vector3{ 0.5f, -0.5f, -0.5f }, Vector2{ 0, 1 } };
-	cube.mesh[13] = { Vector3{ 0.5f, 0.5f, -0.5f }, Vector2{ 0, 0 } };
-	cube.mesh[14] = { Vector3{ 0.5f, 0.5f, 0.5f }, Vector2{ 1, 0 } };
-	cube.mesh[15] = { Vector3{ 0.5f, -0.5f, 0.5f }, Vector2{ 1, 1 } };
-	cube.mesh[16] = { Vector3{ -0.5f, 0.5f, -0.5f }, Vector2{ 0, 1 } };
-	cube.mesh[17] = { Vector3{ -0.5f, 0.5f, 0.5f }, Vector2{ 0, 0 } };
-	cube.mesh[18] = { Vector3{ 0.5f, 0.5f, 0.5f }, Vector2{ 1, 0 } };
-	cube.mesh[19] = { Vector3{ 0.5f, 0.5f, -0.5f }, Vector2{ 1, 1 } };
-	cube.mesh[20] = { Vector3{ -0.5f, -0.5f, 0.5f }, Vector2{ 0, 1 } };
-	cube.mesh[21] = { Vector3{ -0.5f, -0.5f, -0.5f }, Vector2{ 0, 0 } };
-	cube.mesh[22] = { Vector3{ 0.5f, -0.5f, -0.5f }, Vector2{ 1, 0 } };
-	cube.mesh[23] = { Vector3{ 0.5f, -0.5f, 0.5f }, Vector2{ 1, 1 } };
+	cube.mesh[0] =	{ Vector3{ -0.5f, -0.5f, -0.5f }, Vector3{ 0, 0, -1 }, Vector2{ 0, 1 } };
+	cube.mesh[1] =	{ Vector3{ -0.5f, 0.5f, -0.5f }, Vector3{ 0, 0, -1 }, Vector2{ 0, 0 } };
+	cube.mesh[2] =	{ Vector3{ 0.5f, 0.5f, -0.5f }, Vector3{ 0, 0, -1 }, Vector2{ 1, 0 } };
+	cube.mesh[3] =	{ Vector3{ 0.5f, -0.5f, -0.5f }, Vector3{ 0, 0, -1 }, Vector2{ 1, 1 } };
+	cube.mesh[4] =	{ Vector3{ -0.5f, -0.5f, 0.5f }, Vector3{ -1, 0, 0 }, Vector2{ 0, 1 } };
+	cube.mesh[5] =	{ Vector3{ -0.5f, 0.5f, 0.5f }, Vector3{ -1, 0, 0 }, Vector2{ 0, 0 } };
+	cube.mesh[6] =	{ Vector3{ -0.5f, 0.5f, -0.5f }, Vector3{ -1, 0, 0 }, Vector2{ 1, 0 } };
+	cube.mesh[7] =	{ Vector3{ -0.5f, -0.5f, -0.5f }, Vector3{ -1, 0, 0 }, Vector2{ 1, 1 } };
+	cube.mesh[8] =	{ Vector3{ 0.5f, -0.5f, 0.5f }, Vector3{ 0, 0, 1 }, Vector2{ 0, 1 } };
+	cube.mesh[9] =	{ Vector3{ 0.5f, 0.5f, 0.5f }, Vector3{ 0, 0, 1 }, Vector2{ 0, 0 } };
+	cube.mesh[10] = { Vector3{ -0.5f, 0.5f, 0.5f }, Vector3{ 0, 0, 1 }, Vector2{ 1, 0 } };
+	cube.mesh[11] = { Vector3{ -0.5f, -0.5f, 0.5f }, Vector3{ 0, 0, 1 }, Vector2{ 1, 1 } };
+	cube.mesh[12] = { Vector3{ 0.5f, -0.5f, -0.5f }, Vector3{ 1, 0, 0 }, Vector2{ 0, 1 } };
+	cube.mesh[13] = { Vector3{ 0.5f, 0.5f, -0.5f }, Vector3{ 1, 0, 0 }, Vector2{ 0, 0 } };
+	cube.mesh[14] = { Vector3{ 0.5f, 0.5f, 0.5f }, Vector3{ 1, 0, 0 }, Vector2{ 1, 0 } };
+	cube.mesh[15] = { Vector3{ 0.5f, -0.5f, 0.5f }, Vector3{ 1, 0, 0 }, Vector2{ 1, 1 } };
+	cube.mesh[16] = { Vector3{ -0.5f, 0.5f, -0.5f }, Vector3{ 0, 1, 0 }, Vector2{ 0, 1 } };
+	cube.mesh[17] = { Vector3{ -0.5f, 0.5f, 0.5f }, Vector3{ 0, 1, 0 }, Vector2{ 0, 0 } };
+	cube.mesh[18] = { Vector3{ 0.5f, 0.5f, 0.5f }, Vector3{ 0, 1, 0 }, Vector2{ 1, 0 } };
+	cube.mesh[19] = { Vector3{ 0.5f, 0.5f, -0.5f }, Vector3{ 0, 1, 0 }, Vector2{ 1, 1 } };
+	cube.mesh[20] = { Vector3{ -0.5f, -0.5f, 0.5f }, Vector3{ 0, -1, 0 }, Vector2{ 0, 1 } };
+	cube.mesh[21] = { Vector3{ -0.5f, -0.5f, -0.5f }, Vector3{ 0, -1, 0 }, Vector2{ 0, 0 } };
+	cube.mesh[22] = { Vector3{ 0.5f, -0.5f, -0.5f }, Vector3{ 0, -1, 0 }, Vector2{ 1, 0 } };
+	cube.mesh[23] = { Vector3{ 0.5f, -0.5f, 0.5f }, Vector3{ 0, -1, 0 }, Vector2{ 1, 1 } };
 	cube.totalIndices = 36;
 	cube.indices = new int[cube.totalIndices]
 	{
@@ -652,7 +653,6 @@ Texture	SRLoadBitmap24(const char* path)
 	tex.data = new Pixel[tex.w * tex.h];
 	for (int i = 0; i < tex.w * tex.h; ++i)
 	{
-		long cur = ftell(file);
 		fread(&tex.data[i], sizeof(Pixel), 1, file);
 		byte temp = tex.data[i].b;
 		tex.data[i].b = tex.data[i].r;
@@ -662,6 +662,44 @@ Texture	SRLoadBitmap24(const char* path)
 	return tex;
 }
 #pragma pack()
+
+void SRSetTexture(Texture texture)
+{
+	_texture = texture;
+}
+
+void SRDrawObject(Canvas canvas, Object object, RGB color)
+{
+	Matrix translation = SRCreateTranslation(object.position);
+	Matrix rotateX = SRCreateRotateX(object.eulerAngle.x);
+	Matrix rotateY = SRCreateRotateY(object.eulerAngle.y);
+	Matrix rotateZ = SRCreateRotateZ(object.eulerAngle.z);
+	Matrix scale = SRCreateScaling(object.scale);
+	for (int i = 0; i < object.totalIndices - 2; i += 3)
+	{
+		Vertex vertices[3];
+		for (int j = 0; j < 3; ++j)
+		{
+			Vector3 current = object.mesh[object.indices[i + j]].position;
+			Vector4 v4Current = { current.x, current.y, current.z, 1 };
+			//Transform object space to world space
+			v4Current = v4mul(v4Current, scale);
+			v4Current = v4mul(v4Current, rotateX);
+			v4Current = v4mul(v4Current, rotateY);
+			v4Current = v4mul(v4Current, rotateZ);
+			v4Current = v4mul(v4Current, translation);
+			//Transform world space to view space
+			v4Current = v4mul(v4Current, _view);
+			//Transform view space to projection space
+			v4Current = v4mul(v4Current, _projection);
+			//Transform homogeneous coordinates to point coordinates
+			v4Current = v4div(v4Current, v4Current.w);
+			//Transform projection space to canvas space
+			//vertices[j]. = Vector2{ (v4Current.x + 1) / 2.0f * _width, (v4Current.y + 1) / 2.0f * _height };
+		}
+
+	}
+}
 
 void SRDrawBitmap(Canvas canvas, Texture texture)
 {

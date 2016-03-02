@@ -36,6 +36,8 @@ Object	SRCreateCube(Vector3 position, Vector3 eulerAngle, float side);
 void	SRDrawWireFrame(Canvas canvas, Object object, RGB color);
 Texture	SRLoadBitmap24(const char* path);
 void	SRDrawBitmap(Canvas canvas, Texture texture);
+void	SRSetTexture(Texture texture);
+void	SRDrawObject(Canvas canvas, Object object, RGB color);
 
 int		SRGetWindowWidth();
 int		SRGetWindowHeight();

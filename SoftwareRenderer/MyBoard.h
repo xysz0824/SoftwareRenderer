@@ -11,6 +11,5 @@ public:
 private:
 	Canvas	_mainCanvas;
 	Object	_cube;
-	Texture _tex;
 };
 #endif
