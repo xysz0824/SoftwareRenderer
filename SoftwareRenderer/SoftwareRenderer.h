@@ -37,7 +37,9 @@ void	SRDrawWireFrame(Canvas canvas, Object object, RGB color);
 Texture	SRLoadBitmap24(const char* path);
 void	SRDrawBitmap(Canvas canvas, Texture texture);
 void	SRSetTexture(Texture texture);
-void	SRDrawObject(Canvas canvas, Object object, RGB color);
+bool	SRIsBackface(Vector2* points);
+void	SRRasterize(Canvas canvas, Vertex* triangle);
+void	SRDrawObject(Canvas canvas, Object object);
 
 int		SRGetWindowWidth();
 int		SRGetWindowHeight();

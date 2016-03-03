@@ -13,9 +13,9 @@ MyBoard::~MyBoard()
 void MyBoard::Initialize()
 {
 	_mainCanvas = SRCreateCanvas(0, 0, SRGetWindowWidth(), SRGetWindowHeight());
-	_cube = SRCreateCube(Vector3{ 0, 0, 0 }, Vector3{ 0, 0, 0 }, 1);
+	_cube = SRCreateCube(Vector3{ 0, 0, 0 }, Vector3{ 0, 0, 0 }, 2);
 	SRSetTexture(SRLoadBitmap24("lena.bmp"));
-	SRSetProjection(SRCreatePerspectiveLH(deg2rad(30), (float)SRGetWindowWidth() / (float)SRGetWindowHeight(), 1, 1000));
+	SRSetProjection(SRCreatePerspectiveLH(deg2rad(30), (float)SRGetWindowWidth() / (float)SRGetWindowHeight(), 10, 1000));
 }
 
 void MyBoard::Render(HDC hdc, float dt)

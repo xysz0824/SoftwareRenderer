@@ -586,11 +586,11 @@ Object SRCreateCube(Vector3 position, Vector3 eulerAngle, float side)
 
 void SRDrawWireFrame(Canvas canvas, Object object, RGB color)
 {
-	Matrix translation = SRCreateTranslation(object.position);
-	Matrix rotateX = SRCreateRotateX(object.eulerAngle.x);
-	Matrix rotateY = SRCreateRotateY(object.eulerAngle.y);
-	Matrix rotateZ = SRCreateRotateZ(object.eulerAngle.z);
-	Matrix scale = SRCreateScaling(object.scale);
+	Matrix world = SRCreateScaling(object.scale);
+	world = mmul(world, SRCreateRotateX(object.eulerAngle.x));
+	world = mmul(world, SRCreateRotateX(object.eulerAngle.y));
+	world = mmul(world, SRCreateRotateX(object.eulerAngle.z));
+	world = mmul(world, SRCreateTranslation(object.position));
 	for (int i = 0; i < object.totalIndices - 2; i+=3)
 	{
 		Vector2 points[3];
@@ -599,11 +599,7 @@ void SRDrawWireFrame(Canvas canvas, Object object, RGB color)
 			Vector3 current = object.mesh[object.indices[i + j]].position;
 			Vector4 v4Current = { current.x, current.y, current.z, 1 };
 			//Transform object space to world space
-			v4Current = v4mul(v4Current, scale);
-			v4Current = v4mul(v4Current, rotateX);
-			v4Current = v4mul(v4Current, rotateY);
-			v4Current = v4mul(v4Current, rotateZ);
-			v4Current = v4mul(v4Current, translation);
+			v4Current = v4mul(v4Current, world);
 			//Transform world space to view space
 			v4Current = v4mul(v4Current, _view);
 			//Transform view space to projection space
@@ -668,36 +664,56 @@ void SRSetTexture(Texture texture)
 	_texture = texture;
 }
 
-void SRDrawObject(Canvas canvas, Object object, RGB color)
+bool SRIsBackface(Vector2* points)
 {
-	Matrix translation = SRCreateTranslation(object.position);
-	Matrix rotateX = SRCreateRotateX(object.eulerAngle.x);
-	Matrix rotateY = SRCreateRotateY(object.eulerAngle.y);
-	Matrix rotateZ = SRCreateRotateZ(object.eulerAngle.z);
-	Matrix scale = SRCreateScaling(object.scale);
+	//Use z value of cross product between first and second vector
+	Vector2 first	= { points[1].x - points[0].x, points[1].y - points[0].y };
+	Vector2 second	= { points[2].x - points[1].x, points[2].y - points[1].y };
+	return first.x * second.y > first.y * second.x;
+}
+
+void SRRasterize(Canvas canvas, Vertex* triangle)
+{
+
+}
+
+void SRDrawObject(Canvas canvas, Object object)
+{
+	Matrix world = SRCreateScaling(object.scale);
+	world = mmul(world, SRCreateRotateX(object.eulerAngle.x));
+	world = mmul(world, SRCreateRotateX(object.eulerAngle.y));
+	world = mmul(world, SRCreateRotateX(object.eulerAngle.z));
+	world = mmul(world, SRCreateTranslation(object.position));
 	for (int i = 0; i < object.totalIndices - 2; i += 3)
 	{
+		Vector2 points[3];
 		Vertex vertices[3];
 		for (int j = 0; j < 3; ++j)
 		{
 			Vector3 current = object.mesh[object.indices[i + j]].position;
 			Vector4 v4Current = { current.x, current.y, current.z, 1 };
 			//Transform object space to world space
-			v4Current = v4mul(v4Current, scale);
-			v4Current = v4mul(v4Current, rotateX);
-			v4Current = v4mul(v4Current, rotateY);
-			v4Current = v4mul(v4Current, rotateZ);
-			v4Current = v4mul(v4Current, translation);
+			v4Current = v4mul(v4Current, world);
 			//Transform world space to view space
 			v4Current = v4mul(v4Current, _view);
 			//Transform view space to projection space
 			v4Current = v4mul(v4Current, _projection);
 			//Transform homogeneous coordinates to point coordinates
-			v4Current = v4div(v4Current, v4Current.w);
+			v4Current.x /= v4Current.w;
+			v4Current.y /= v4Current.w;
+			v4Current.z /= v4Current.w;
+			//Primitive assembly
+			points[j] = Vector2{ v4Current.x, v4Current.y };
+			vertices[j].position = Vector3{ v4Current.x, v4Current.y, v4Current.z };
+			vertices[j].normal = object.mesh[object.indices[i + j]].normal;
+			vertices[j].texcoord = object.mesh[object.indices[i + j]].texcoord;
 			//Transform projection space to canvas space
 			//vertices[j]. = Vector2{ (v4Current.x + 1) / 2.0f * _width, (v4Current.y + 1) / 2.0f * _height };
 		}
-
+		if (!SRIsBackface(points))
+		{
+			SRRasterize(canvas, vertices);
+		}
 	}
 }
 
