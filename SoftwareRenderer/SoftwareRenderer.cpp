@@ -609,7 +609,10 @@ void SRDrawWireFrame(Canvas canvas, Object object, RGB color)
 			//Transform projection space to canvas space
 			points[j] = Vector2{ (v4Current.x + 1) / 2.0f * _width, (v4Current.y + 1) / 2.0f * _height };
 		}
-		SRDrawTriangle(canvas, points, color);
+		if (!SRIsBackface(points))
+		{
+			SRDrawTriangle(canvas, points, color);
+		}
 	}
 }
 
@@ -669,12 +672,106 @@ bool SRIsBackface(Vector2* points)
 	//Use z value of cross product between first and second vector
 	Vector2 first	= { points[1].x - points[0].x, points[1].y - points[0].y };
 	Vector2 second	= { points[2].x - points[1].x, points[2].y - points[1].y };
-	return first.x * second.y > first.y * second.x;
+	return first.x * second.y < first.y * second.x;
 }
 
-void SRRasterize(Canvas canvas, Vertex* triangle)
+void SRRasterize(Canvas canvas, Vertex4* triangle)
 {
-
+	int topVertex = triangle[0].position.y < triangle[1].position.y ? 0 : 1;
+	topVertex = triangle[topVertex].position.y < triangle[2].position.y ? topVertex : 2;
+	int bottomVertex = triangle[0].position.y > triangle[1].position.y ? 0 : 1;
+	bottomVertex = triangle[bottomVertex].position.y > triangle[2].position.y ? bottomVertex : 2;
+	int middleVertex = 0;
+	for (int i = 0; i < 3;++i)
+	if (topVertex != i && bottomVertex != i)
+	{
+		middleVertex = i;
+		break;
+	}
+	Vector4 top = triangle[topVertex].position;
+	Vector4 mid = triangle[middleVertex].position;
+	Vector4 btm = triangle[bottomVertex].position;
+	//Use perspective texture mapping
+	for (float y = top.y; y < btm.y; ++y)
+	{
+		int x1, x2;
+		float ozTop, ozBtm, oz1, oz2;
+		float sozTop, sozBtm, soz1, soz2;
+		float tozTop, tozBtm, toz1, toz2;
+		if (y < mid.y)
+		{
+			x1 = (int)((y - top.y) * (mid.x - top.x) / (mid.y - top.y) + top.x + 0.5f);
+			ozTop = 1.0f / top.w;
+			ozBtm = 1.0f / mid.w;
+			oz1 = (y - top.y) * (ozBtm - ozTop) / (mid.y - top.y) + ozTop;
+			sozTop = triangle[topVertex].texcoord.x * ozTop;
+			sozBtm = triangle[middleVertex].texcoord.x * ozBtm;
+			soz1 = (y - top.y) * (sozBtm - sozTop) / (mid.y - top.y) + sozTop;
+			tozTop = triangle[topVertex].texcoord.y * ozTop;
+			tozBtm = triangle[middleVertex].texcoord.y * ozBtm;
+			toz1 = (y - top.y) * (tozBtm - tozTop) / (mid.y - top.y) + tozTop;
+		}
+		else
+		{
+			x1 = (int)((y - mid.y) * (btm.x - mid.x) / (btm.y - mid.y) + mid.x + 0.5f);
+			ozTop = 1.0f / mid.w;
+			ozBtm = 1.0f / btm.w;
+			oz1 = (y - mid.y) * (ozBtm - ozTop) / (btm.y - mid.y) + ozTop;
+			sozTop = triangle[middleVertex].texcoord.x * ozTop;
+			sozBtm = triangle[bottomVertex].texcoord.x * ozBtm;
+			soz1 = (y - mid.y) * (sozBtm - sozTop) / (btm.y - mid.y) + sozTop;
+			tozTop = triangle[middleVertex].texcoord.y * ozTop;
+			tozBtm = triangle[bottomVertex].texcoord.y * ozBtm;
+			toz1 = (y - mid.y) * (tozBtm - tozTop) / (btm.y - mid.y) + tozTop;
+		}
+		x2 = (int)((y - top.y) * (btm.x - top.x) / (btm.y - top.y) + top.x + 0.5f);
+		ozTop = 1.0f / top.w;
+		ozBtm = 1.0f / btm.w;
+		oz2 = (y - top.y) * (ozBtm - ozTop) / (btm.y - top.y) + ozTop;
+		sozTop = triangle[topVertex].texcoord.x * ozTop;
+		sozBtm = triangle[bottomVertex].texcoord.x * ozBtm;
+		soz2 = (y - top.y) * (sozBtm - sozTop) / (btm.y - top.y) + sozTop;
+		tozTop = triangle[topVertex].texcoord.y * ozTop;
+		tozBtm = triangle[bottomVertex].texcoord.y * ozBtm;
+		toz2 = (y - top.y) * (tozBtm - tozTop) / (btm.y - top.y) + tozTop;
+		if (x2 == x1)
+		{
+			float s = soz1 / oz1;
+			float t = toz1 / oz1;
+			int tx = s * _texture.w;
+			int ty = t * _texture.h;
+			canvas.buffer[(int)y * canvas.w + x1] = _texture.data[(_texture.h - ty - 1) * _texture.w + tx];
+		}
+		else
+		{
+			float ozstep = (oz2 - oz1) / (x2 - x1);
+			float sozstep = (soz2 - soz1) / (x2 - x1);
+			float tozstep = (toz2 - toz1) / (x2 - x1);
+			float oz = oz1, soz = soz1, toz = toz1;
+			for (int i = 0, x = x1; i < abs(x1 - x2); ++i)
+			{
+				float s = soz / oz;
+				float t = toz / oz;
+				if (x1 < x2)
+				{
+					x++;
+					oz += ozstep;
+					soz += sozstep;
+					toz += tozstep;
+				}
+				else
+				{
+					x--;
+					oz -= ozstep;
+					soz -= sozstep;
+					toz -= tozstep;
+				}
+				int tx = s * _texture.w;
+				int ty = t * _texture.h;
+				canvas.buffer[(int)y * canvas.w + x] = _texture.data[(_texture.h - ty - 1) * _texture.w + tx];
+			}
+		}
+	}
 }
 
 void SRDrawObject(Canvas canvas, Object object)
@@ -687,7 +784,7 @@ void SRDrawObject(Canvas canvas, Object object)
 	for (int i = 0; i < object.totalIndices - 2; i += 3)
 	{
 		Vector2 points[3];
-		Vertex vertices[3];
+		Vertex4 vertices[3];
 		for (int j = 0; j < 3; ++j)
 		{
 			Vector3 current = object.mesh[object.indices[i + j]].position;
@@ -704,11 +801,15 @@ void SRDrawObject(Canvas canvas, Object object)
 			v4Current.z /= v4Current.w;
 			//Primitive assembly
 			points[j] = Vector2{ v4Current.x, v4Current.y };
-			vertices[j].position = Vector3{ v4Current.x, v4Current.y, v4Current.z };
+			vertices[j].position = Vector4
+			{ 
+				(v4Current.x + 1) / 2.0f * _width,
+				(v4Current.y + 1) / 2.0f * _height,
+				v4Current.z,
+				v4Current.w
+			};
 			vertices[j].normal = object.mesh[object.indices[i + j]].normal;
 			vertices[j].texcoord = object.mesh[object.indices[i + j]].texcoord;
-			//Transform projection space to canvas space
-			//vertices[j]. = Vector2{ (v4Current.x + 1) / 2.0f * _width, (v4Current.y + 1) / 2.0f * _height };
 		}
 		if (!SRIsBackface(points))
 		{

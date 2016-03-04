@@ -38,7 +38,7 @@ Texture	SRLoadBitmap24(const char* path);
 void	SRDrawBitmap(Canvas canvas, Texture texture);
 void	SRSetTexture(Texture texture);
 bool	SRIsBackface(Vector2* points);
-void	SRRasterize(Canvas canvas, Vertex* triangle);
+void	SRRasterize(Canvas canvas, Vertex4* triangle);
 void	SRDrawObject(Canvas canvas, Object object);
 
 int		SRGetWindowWidth();

@@ -22,6 +22,13 @@ struct Vertex
 	Vector2 texcoord;
 };
 
+struct Vertex4
+{
+	Vector4 position;
+	Vector3 normal;
+	Vector2 texcoord;
+};
+
 struct Object
 {
 	Vertex* mesh;
