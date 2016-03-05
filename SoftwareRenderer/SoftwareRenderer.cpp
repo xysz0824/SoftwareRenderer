@@ -132,10 +132,12 @@ WPARAM SRRunWindow(HWND hwnd, int nCmdShow)
 			_renderBoard->Render(hdc, dt);
 			if (msec >= 200)
 			{
-				strLen = sprintf_s(str, "%d", fps * (1000 / msec));
+				strLen = sprintf_s(str, "FPS:%d", fps * (1000 / msec));
 				msec = 0;
 				fps = 0;
 			}
+			SetBkMode(hdc, TRANSPARENT);
+			SetTextColor(hdc, 0xFFFFFF);
 			TextOut(hdc, 0, 0, str, strLen);
 			d2 = GetTickCount();
 			dt = (d2 - d1) / 1000.0f;
@@ -694,13 +696,13 @@ void SRRasterize(Canvas canvas, Vertex4* triangle)
 	//Use perspective texture mapping
 	for (float y = top.y; y < btm.y; ++y)
 	{
-		int x1, x2;
+		float x1, x2;
 		float ozTop, ozBtm, oz1, oz2;
 		float sozTop, sozBtm, soz1, soz2;
 		float tozTop, tozBtm, toz1, toz2;
 		if (y < mid.y)
 		{
-			x1 = (int)((y - top.y) * (mid.x - top.x) / (mid.y - top.y) + top.x + 0.5f);
+			x1 = (y - top.y) * (mid.x - top.x) / (mid.y - top.y) + top.x;
 			ozTop = 1.0f / top.w;
 			ozBtm = 1.0f / mid.w;
 			oz1 = (y - top.y) * (ozBtm - ozTop) / (mid.y - top.y) + ozTop;
@@ -713,7 +715,7 @@ void SRRasterize(Canvas canvas, Vertex4* triangle)
 		}
 		else
 		{
-			x1 = (int)((y - mid.y) * (btm.x - mid.x) / (btm.y - mid.y) + mid.x + 0.5f);
+			x1 = (y - mid.y) * (btm.x - mid.x) / (btm.y - mid.y) + mid.x;
 			ozTop = 1.0f / mid.w;
 			ozBtm = 1.0f / btm.w;
 			oz1 = (y - mid.y) * (ozBtm - ozTop) / (btm.y - mid.y) + ozTop;
@@ -724,7 +726,7 @@ void SRRasterize(Canvas canvas, Vertex4* triangle)
 			tozBtm = triangle[bottomVertex].texcoord.y * ozBtm;
 			toz1 = (y - mid.y) * (tozBtm - tozTop) / (btm.y - mid.y) + tozTop;
 		}
-		x2 = (int)((y - top.y) * (btm.x - top.x) / (btm.y - top.y) + top.x + 0.5f);
+		x2 = (y - top.y) * (btm.x - top.x) / (btm.y - top.y) + top.x;
 		ozTop = 1.0f / top.w;
 		ozBtm = 1.0f / btm.w;
 		oz2 = (y - top.y) * (ozBtm - ozTop) / (btm.y - top.y) + ozTop;
@@ -738,9 +740,9 @@ void SRRasterize(Canvas canvas, Vertex4* triangle)
 		{
 			float s = soz1 / oz1;
 			float t = toz1 / oz1;
-			int tx = s * _texture.w;
-			int ty = t * _texture.h;
-			canvas.buffer[(int)y * canvas.w + x1] = _texture.data[(_texture.h - ty - 1) * _texture.w + tx];
+			float tx = s * _texture.w;
+			float ty = t * _texture.h;
+			canvas.buffer[(int)y * canvas.w + (int)x1] = _texture.data[(int)(_texture.h - ty - 1) * _texture.w + (int)tx];
 		}
 		else
 		{
@@ -748,13 +750,18 @@ void SRRasterize(Canvas canvas, Vertex4* triangle)
 			float sozstep = (soz2 - soz1) / (x2 - x1);
 			float tozstep = (toz2 - toz1) / (x2 - x1);
 			float oz = oz1, soz = soz1, toz = toz1;
-			for (int i = 0, x = x1; i < abs(x1 - x2); ++i)
+			for (int i = 0, x = x1;; ++i)
 			{
 				float s = soz / oz;
 				float t = toz / oz;
+				float tx = s * _texture.w;
+				float ty = t * _texture.h;
+				canvas.buffer[(int)y * canvas.w + (int)x] = _texture.data[(int)(_texture.h - ty - 1) * _texture.w + (int)tx];
 				if (x1 < x2)
 				{
 					x++;
+					if (x > x2)
+						break;
 					oz += ozstep;
 					soz += sozstep;
 					toz += tozstep;
@@ -762,13 +769,12 @@ void SRRasterize(Canvas canvas, Vertex4* triangle)
 				else
 				{
 					x--;
+					if (x < x2)
+						break;
 					oz -= ozstep;
 					soz -= sozstep;
 					toz -= tozstep;
 				}
-				int tx = s * _texture.w;
-				int ty = t * _texture.h;
-				canvas.buffer[(int)y * canvas.w + x] = _texture.data[(_texture.h - ty - 1) * _texture.w + tx];
 			}
 		}
 	}
