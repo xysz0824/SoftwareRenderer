@@ -201,8 +201,7 @@ Canvas SRCreateCanvas(int x, int y, int w, int h)
 	assert(_hasWindow);
 
 	Pixel* buffer = new Pixel[_width * _height];
-	float* zBuffer = new float[_width * _height];
-	Canvas canvas = { buffer, zBuffer, x, y, w, h };
+	Canvas canvas = { buffer, x, y, w, h };
 	return canvas;
 }
 
@@ -213,7 +212,6 @@ void SRClearCanvas(Canvas canvas, RGB color)
 		canvas.buffer[i].r = color.r;
 		canvas.buffer[i].g = color.g;
 		canvas.buffer[i].b = color.b;
-		canvas.zBuffer[i] = 0;
 	}
 }
 
@@ -698,13 +696,25 @@ void SRRasterize(Canvas canvas, Vertex4* triangle)
 	//Use perspective texture mapping
 	for (float y = top.y; y < btm.y; ++y)
 	{
+<<<<<<< HEAD
+		int x1, x2;
+		float pzTop, pzBtm, pz1, pz2;
+=======
 		float x1, x2;
+>>>>>>> 17d25b903e4c8a41a8847d346135b8cb2ac79fbf
 		float ozTop, ozBtm, oz1, oz2;
 		float sozTop, sozBtm, soz1, soz2;
 		float tozTop, tozBtm, toz1, toz2;
 		if (y < mid.y)
 		{
+<<<<<<< HEAD
+			x1 = (int)((y - top.y) * (mid.x - top.x) / (mid.y - top.y) + top.x + 0.5f);
+			pzTop = top.z;
+			pzBtm = mid.z;
+			pz1 = (y - top.y) * (pzBtm - pzTop) / (mid.y - top.y) + pzTop;
+=======
 			x1 = (y - top.y) * (mid.x - top.x) / (mid.y - top.y) + top.x;
+>>>>>>> 17d25b903e4c8a41a8847d346135b8cb2ac79fbf
 			ozTop = 1.0f / top.w;
 			ozBtm = 1.0f / mid.w;
 			oz1 = (y - top.y) * (ozBtm - ozTop) / (mid.y - top.y) + ozTop;
@@ -717,7 +727,14 @@ void SRRasterize(Canvas canvas, Vertex4* triangle)
 		}
 		else
 		{
+<<<<<<< HEAD
+			x1 = (int)((y - mid.y) * (btm.x - mid.x) / (btm.y - mid.y) + mid.x + 0.5f);
+			pzTop = mid.z;
+			pzBtm = btm.z;
+			pz1 = (y - mid.y) * (pzBtm - pzTop) / (btm.y - mid.y) + pzTop;
+=======
 			x1 = (y - mid.y) * (btm.x - mid.x) / (btm.y - mid.y) + mid.x;
+>>>>>>> 17d25b903e4c8a41a8847d346135b8cb2ac79fbf
 			ozTop = 1.0f / mid.w;
 			ozBtm = 1.0f / btm.w;
 			oz1 = (y - mid.y) * (ozBtm - ozTop) / (btm.y - mid.y) + ozTop;
@@ -728,7 +745,14 @@ void SRRasterize(Canvas canvas, Vertex4* triangle)
 			tozBtm = triangle[bottomVertex].texcoord.y * ozBtm;
 			toz1 = (y - mid.y) * (tozBtm - tozTop) / (btm.y - mid.y) + tozTop;
 		}
+<<<<<<< HEAD
+		x2 = (int)((y - top.y) * (btm.x - top.x) / (btm.y - top.y) + top.x + 0.5f);
+		pzTop = top.z;
+		pzBtm = btm.z;
+		pz2 = (y - top.y) * (pzBtm - pzTop) / (btm.y - top.y) + pzTop;
+=======
 		x2 = (y - top.y) * (btm.x - top.x) / (btm.y - top.y) + top.x;
+>>>>>>> 17d25b903e4c8a41a8847d346135b8cb2ac79fbf
 		ozTop = 1.0f / top.w;
 		ozBtm = 1.0f / btm.w;
 		oz2 = (y - top.y) * (ozBtm - ozTop) / (btm.y - top.y) + ozTop;
@@ -742,44 +766,47 @@ void SRRasterize(Canvas canvas, Vertex4* triangle)
 		{
 			float s = soz1 / oz1;
 			float t = toz1 / oz1;
+<<<<<<< HEAD
+			int tx = s * _texture.w;
+			int ty = t * _texture.h;
+			if (pz1 > 0 && pz1 < 1)
+			{
+				canvas.buffer[(int)y * canvas.w + x1] = _texture.data[(_texture.h - ty - 1) * _texture.w + tx];
+			}
+=======
 			float tx = s * _texture.w;
 			float ty = t * _texture.h;
-			int bufferIndex = (int)y * canvas.w + (int)x1;
-			int dataIndex = (int)(_texture.h - ty - 1) * _texture.w + (int)tx;
-			if (bufferIndex > 0 && bufferIndex < _width * _height &&
-				dataIndex > 0 && dataIndex < _texture.w * _texture.h &&
-				canvas.zBuffer[bufferIndex] < oz1)
-			{
-				canvas.buffer[bufferIndex] = _texture.data[dataIndex];
-				canvas.zBuffer[bufferIndex] = oz1;
-			}
+			canvas.buffer[(int)y * canvas.w + (int)x1] = _texture.data[(int)(_texture.h - ty - 1) * _texture.w + (int)tx];
+>>>>>>> 17d25b903e4c8a41a8847d346135b8cb2ac79fbf
 		}
 		else
 		{
+			float pzstep = (pz2 - pz1) / (x2 - x1);
 			float ozstep = (oz2 - oz1) / (x2 - x1);
 			float sozstep = (soz2 - soz1) / (x2 - x1);
 			float tozstep = (toz2 - toz1) / (x2 - x1);
+<<<<<<< HEAD
+			float pz = pz1, oz = oz1, soz = soz1, toz = toz1;
+			for (int i = 0, x = x1; i < abs(x1 - x2); ++i)
+=======
 			float oz = oz1, soz = soz1, toz = toz1;
 			for (int i = 0, x = x1;; ++i)
+>>>>>>> 17d25b903e4c8a41a8847d346135b8cb2ac79fbf
 			{
 				float s = soz / oz;
 				float t = toz / oz;
 				float tx = s * _texture.w;
 				float ty = t * _texture.h;
-				int bufferIndex = (int)y * canvas.w + (int)x;
-				int dataIndex = (int)(_texture.h - ty - 1) * _texture.w + (int)tx;
-				if (bufferIndex > 0 && bufferIndex < _width * _height &&
-					dataIndex > 0 && dataIndex < _texture.w * _texture.h &&
-					canvas.zBuffer[bufferIndex] < oz)
-				{
-					canvas.buffer[bufferIndex] = _texture.data[dataIndex];
-					canvas.zBuffer[bufferIndex] = oz;
-				}
+				canvas.buffer[(int)y * canvas.w + (int)x] = _texture.data[(int)(_texture.h - ty - 1) * _texture.w + (int)tx];
 				if (x1 < x2)
 				{
 					x++;
+<<<<<<< HEAD
+					pz += pzstep;
+=======
 					if (x > x2)
 						break;
+>>>>>>> 17d25b903e4c8a41a8847d346135b8cb2ac79fbf
 					oz += ozstep;
 					soz += sozstep;
 					toz += tozstep;
@@ -787,12 +814,25 @@ void SRRasterize(Canvas canvas, Vertex4* triangle)
 				else
 				{
 					x--;
+<<<<<<< HEAD
+					pz -= pzstep;
+=======
 					if (x < x2)
 						break;
+>>>>>>> 17d25b903e4c8a41a8847d346135b8cb2ac79fbf
 					oz -= ozstep;
 					soz -= sozstep;
 					toz -= tozstep;
 				}
+<<<<<<< HEAD
+				int tx = s * _texture.w;
+				int ty = t * _texture.h;
+				if (pz > 0 && pz < 1)
+				{
+					canvas.buffer[(int)y * canvas.w + x] = _texture.data[(_texture.h - ty - 1) * _texture.w + tx];
+				}
+=======
+>>>>>>> 17d25b903e4c8a41a8847d346135b8cb2ac79fbf
 			}
 		}
 	}
@@ -802,8 +842,8 @@ void SRDrawObject(Canvas canvas, Object object)
 {
 	Matrix world = SRCreateScaling(object.scale);
 	world = mmul(world, SRCreateRotateX(object.eulerAngle.x));
-	world = mmul(world, SRCreateRotateY(object.eulerAngle.y));
-	world = mmul(world, SRCreateRotateZ(object.eulerAngle.z));
+	world = mmul(world, SRCreateRotateX(object.eulerAngle.y));
+	world = mmul(world, SRCreateRotateX(object.eulerAngle.z));
 	world = mmul(world, SRCreateTranslation(object.position));
 	for (int i = 0; i < object.totalIndices - 2; i += 3)
 	{
@@ -813,8 +853,11 @@ void SRDrawObject(Canvas canvas, Object object)
 		{
 			Vector3 current = object.mesh[object.indices[i + j]].position;
 			Vector4 v4Current = { current.x, current.y, current.z, 1 };
+			Vector3 normal = object.mesh[object.indices[i + j]].normal;
+			Vector4 v4normal = { normal.x, normal.y, normal.z, 1 };
 			//Transform object space to world space
 			v4Current = v4mul(v4Current, world);
+			v4normal = v4mul(v4normal, world);
 			//Transform world space to view space
 			v4Current = v4mul(v4Current, _view);
 			//Transform view space to projection space
@@ -832,7 +875,7 @@ void SRDrawObject(Canvas canvas, Object object)
 				v4Current.z,
 				v4Current.w
 			};
-			vertices[j].normal = object.mesh[object.indices[i + j]].normal;
+			vertices[j].normal = Vector3{ v4normal.x, v4normal.y, v4normal.z };
 			vertices[j].texcoord = object.mesh[object.indices[i + j]].texcoord;
 		}
 		if (!SRIsBackface(points))

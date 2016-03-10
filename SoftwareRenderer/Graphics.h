@@ -12,6 +12,7 @@ typedef Pixel RGB;
 struct Canvas
 {
 	Pixel* buffer;
+	float* zBuffer;
 	int x, y, w, h;
 };
 
