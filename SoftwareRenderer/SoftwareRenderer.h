@@ -38,6 +38,8 @@ Texture	SRLoadBitmap24(const char* path);
 void	SRDrawBitmap(Canvas canvas, Texture texture);
 void	SRSetTexture(Texture texture);
 bool	SRIsBackface(Vector2* points);
+bool	SRIsBackface(Vector3* points);
+bool	SRIsInvisible(Vector3* points);
 void	SRRasterize(Canvas canvas, Vertex4* triangle);
 void	SRDrawObject(Canvas canvas, Object object);
 

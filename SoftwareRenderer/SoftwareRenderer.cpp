@@ -611,7 +611,7 @@ void SRDrawWireFrame(Canvas canvas, Object object, RGB color)
 			//Transform homogeneous coordinates to point coordinates
 			v4Current = v4div(v4Current, v4Current.w);
 			//Transform projection space to canvas space
-			points[j] = Vector2{ (v4Current.x + 1) / 2.0f * _width, (v4Current.y + 1) / 2.0f * _height };
+			points[j] = Vector2{ (v4Current.x + 1) / 2.0f * _width, (v4Current.y + 1) / 2.0f * _height};
 		}
 		if (!SRIsBackface(points))
 		{
@@ -671,11 +671,70 @@ void SRSetTexture(Texture texture)
 	_texture = texture;
 }
 
+bool SRIsInvisible(Vector3* points)
+{
+	int outofZ = 0;
+	for (int i = 0; i < 3; ++i)
+	{
+		if (points[i].z <= 0 || points[i].z >= 1)
+		{
+			outofZ++;
+		}
+	}
+	if (outofZ == 3)
+	{
+		return true;
+	}
+	for (int i = 0; i < 3; ++i)
+	{
+		if (points[i].x > -1 && points[i].x < 1 && 
+			points[i].y > -1 && points[i].y < 1)
+		{
+			return false;
+		}
+		float u = points[(i + 1) % 3].x - points[i].x;
+		float v = points[(i + 1) % 3].y - points[i].y;
+		//Top edge
+		float p = (-1 - points[i].y) * u / v + points[i].x;
+		if (p > -1 && p < 1)
+		{
+			return false;
+		}
+		//Bottom edge
+		p = (1 - points[i].y) * u / v + points[i].x;
+		if (p > -1 && p < 1)
+		{
+			return false;
+		}
+		//Left edge
+		p = (-1 - points[i].x) * v / u + points[i].y;
+		if (p > -1 && p < 1)
+		{
+			return false;
+		}
+		//Right edge
+		p = (1 - points[i].x) * v / u + points[i].y;
+		if (p > -1 && p < 1)
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
 bool SRIsBackface(Vector2* points)
 {
 	//Use z value of cross product between first and second vector
 	Vector2 first	= { points[1].x - points[0].x, points[1].y - points[0].y };
 	Vector2 second	= { points[2].x - points[1].x, points[2].y - points[1].y };
+	return first.x * second.y < first.y * second.x;
+}
+
+bool SRIsBackface(Vector3* points)
+{
+	//Use z value of cross product between first and second vector
+	Vector2 first = { points[1].x - points[0].x, points[1].y - points[0].y };
+	Vector2 second = { points[2].x - points[1].x, points[2].y - points[1].y };
 	return first.x * second.y < first.y * second.x;
 }
 
@@ -696,12 +755,13 @@ void SRRasterize(Canvas canvas, Vertex4* triangle)
 	Vector4 mid = triangle[middleVertex].position;
 	Vector4 btm = triangle[bottomVertex].position;
 	//Use perspective texture mapping
-	for (float y = top.y; y < btm.y; ++y)
+	for (float y = top.y < 0 ? 0 : top.y; y < (btm.y > canvas.h ? canvas.h : btm.y); ++y)
 	{
 		float x1, x2;
 		float ozTop, ozBtm, oz1, oz2;
 		float sozTop, sozBtm, soz1, soz2;
 		float tozTop, tozBtm, toz1, toz2;
+		x2 = (y - top.y) * (btm.x - top.x) / (btm.y - top.y) + top.x;
 		if (y < mid.y)
 		{
 			x1 = (y - top.y) * (mid.x - top.x) / (mid.y - top.y) + top.x;
@@ -728,7 +788,6 @@ void SRRasterize(Canvas canvas, Vertex4* triangle)
 			tozBtm = triangle[bottomVertex].texcoord.y * ozBtm;
 			toz1 = (y - mid.y) * (tozBtm - tozTop) / (btm.y - mid.y) + tozTop;
 		}
-		x2 = (y - top.y) * (btm.x - top.x) / (btm.y - top.y) + top.x;
 		ozTop = 1.0f / top.w;
 		ozBtm = 1.0f / btm.w;
 		oz2 = (y - top.y) * (ozBtm - ozTop) / (btm.y - top.y) + ozTop;
@@ -746,9 +805,7 @@ void SRRasterize(Canvas canvas, Vertex4* triangle)
 			float ty = t * _texture.h;
 			int bufferIndex = (int)y * canvas.w + (int)x1;
 			int dataIndex = (int)(_texture.h - ty - 1) * _texture.w + (int)tx;
-			if (bufferIndex > 0 && bufferIndex < _width * _height &&
-				dataIndex > 0 && dataIndex < _texture.w * _texture.h &&
-				canvas.zBuffer[bufferIndex] < oz1)
+			if (x1 >= 0 && x1 < _width && canvas.zBuffer[bufferIndex] < oz1)
 			{
 				canvas.buffer[bufferIndex] = _texture.data[dataIndex];
 				canvas.zBuffer[bufferIndex] = oz1;
@@ -760,7 +817,7 @@ void SRRasterize(Canvas canvas, Vertex4* triangle)
 			float sozstep = (soz2 - soz1) / (x2 - x1);
 			float tozstep = (toz2 - toz1) / (x2 - x1);
 			float oz = oz1, soz = soz1, toz = toz1;
-			for (int i = 0, x = x1;; ++i)
+			for (float i = 0, x = x1;; ++i)
 			{
 				float s = soz / oz;
 				float t = toz / oz;
@@ -768,9 +825,7 @@ void SRRasterize(Canvas canvas, Vertex4* triangle)
 				float ty = t * _texture.h;
 				int bufferIndex = (int)y * canvas.w + (int)x;
 				int dataIndex = (int)(_texture.h - ty - 1) * _texture.w + (int)tx;
-				if (bufferIndex > 0 && bufferIndex < _width * _height &&
-					dataIndex > 0 && dataIndex < _texture.w * _texture.h &&
-					canvas.zBuffer[bufferIndex] < oz)
+				if (x >= 0 && x < _width && canvas.zBuffer[bufferIndex] < oz)
 				{
 					canvas.buffer[bufferIndex] = _texture.data[dataIndex];
 					canvas.zBuffer[bufferIndex] = oz;
@@ -807,7 +862,7 @@ void SRDrawObject(Canvas canvas, Object object)
 	world = mmul(world, SRCreateTranslation(object.position));
 	for (int i = 0; i < object.totalIndices - 2; i += 3)
 	{
-		Vector2 points[3];
+		Vector3 points[3];
 		Vertex4 vertices[3];
 		for (int j = 0; j < 3; ++j)
 		{
@@ -824,7 +879,7 @@ void SRDrawObject(Canvas canvas, Object object)
 			v4Current.y /= v4Current.w;
 			v4Current.z /= v4Current.w;
 			//Primitive assembly
-			points[j] = Vector2{ v4Current.x, v4Current.y };
+			points[j] = Vector3{ v4Current.x, v4Current.y, v4Current.z };
 			vertices[j].position = Vector4
 			{ 
 				(v4Current.x + 1) / 2.0f * _width,
@@ -835,7 +890,7 @@ void SRDrawObject(Canvas canvas, Object object)
 			vertices[j].normal = object.mesh[object.indices[i + j]].normal;
 			vertices[j].texcoord = object.mesh[object.indices[i + j]].texcoord;
 		}
-		if (!SRIsBackface(points))
+		if (!SRIsInvisible(points) && !SRIsBackface(points))
 		{
 			SRRasterize(canvas, vertices);
 		}
