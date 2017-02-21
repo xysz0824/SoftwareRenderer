@@ -592,8 +592,8 @@ void SRDrawWireFrame(Canvas canvas, Object object, RGB color)
 {
 	Matrix world = SRCreateScaling(object.scale);
 	world = mmul(world, SRCreateRotateX(object.eulerAngle.x));
-	world = mmul(world, SRCreateRotateX(object.eulerAngle.y));
-	world = mmul(world, SRCreateRotateX(object.eulerAngle.z));
+	world = mmul(world, SRCreateRotateY(object.eulerAngle.y));
+	world = mmul(world, SRCreateRotateZ(object.eulerAngle.z));
 	world = mmul(world, SRCreateTranslation(object.position));
 	for (int i = 0; i < object.totalIndices - 2; i+=3)
 	{
