@@ -40,7 +40,7 @@ void	SRSetTexture(Texture texture);
 bool	SRIsBackface(Vector2* points);
 bool	SRIsBackface(Vector3* points);
 bool	SRIsInvisible(Vector3* points);
-void	SRRasterize(Canvas canvas, Vertex4* triangle);
+void	SRRasterize(Canvas canvas, Vertex* triangle);
 void	SRDrawObject(Canvas canvas, Object object);
 
 int		SRGetWindowWidth();

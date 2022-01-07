@@ -548,30 +548,30 @@ Object SRCreateCube(Vector3 position, Vector3 eulerAngle, float side)
 	Object cube;
 	cube.totalVertex = 24;
 	cube.mesh = new Vertex[cube.totalVertex];
-	cube.mesh[0] =	{ Vector3{ -0.5f, -0.5f, -0.5f }, Vector3{ 0, 0, -1 }, Vector2{ 0, 1 } };
-	cube.mesh[1] =	{ Vector3{ -0.5f, 0.5f, -0.5f }, Vector3{ 0, 0, -1 }, Vector2{ 0, 0 } };
-	cube.mesh[2] =	{ Vector3{ 0.5f, 0.5f, -0.5f }, Vector3{ 0, 0, -1 }, Vector2{ 1, 0 } };
-	cube.mesh[3] =	{ Vector3{ 0.5f, -0.5f, -0.5f }, Vector3{ 0, 0, -1 }, Vector2{ 1, 1 } };
-	cube.mesh[4] =	{ Vector3{ -0.5f, -0.5f, 0.5f }, Vector3{ -1, 0, 0 }, Vector2{ 0, 1 } };
-	cube.mesh[5] =	{ Vector3{ -0.5f, 0.5f, 0.5f }, Vector3{ -1, 0, 0 }, Vector2{ 0, 0 } };
-	cube.mesh[6] =	{ Vector3{ -0.5f, 0.5f, -0.5f }, Vector3{ -1, 0, 0 }, Vector2{ 1, 0 } };
-	cube.mesh[7] =	{ Vector3{ -0.5f, -0.5f, -0.5f }, Vector3{ -1, 0, 0 }, Vector2{ 1, 1 } };
-	cube.mesh[8] =	{ Vector3{ 0.5f, -0.5f, 0.5f }, Vector3{ 0, 0, 1 }, Vector2{ 0, 1 } };
-	cube.mesh[9] =	{ Vector3{ 0.5f, 0.5f, 0.5f }, Vector3{ 0, 0, 1 }, Vector2{ 0, 0 } };
-	cube.mesh[10] = { Vector3{ -0.5f, 0.5f, 0.5f }, Vector3{ 0, 0, 1 }, Vector2{ 1, 0 } };
-	cube.mesh[11] = { Vector3{ -0.5f, -0.5f, 0.5f }, Vector3{ 0, 0, 1 }, Vector2{ 1, 1 } };
-	cube.mesh[12] = { Vector3{ 0.5f, -0.5f, -0.5f }, Vector3{ 1, 0, 0 }, Vector2{ 0, 1 } };
-	cube.mesh[13] = { Vector3{ 0.5f, 0.5f, -0.5f }, Vector3{ 1, 0, 0 }, Vector2{ 0, 0 } };
-	cube.mesh[14] = { Vector3{ 0.5f, 0.5f, 0.5f }, Vector3{ 1, 0, 0 }, Vector2{ 1, 0 } };
-	cube.mesh[15] = { Vector3{ 0.5f, -0.5f, 0.5f }, Vector3{ 1, 0, 0 }, Vector2{ 1, 1 } };
-	cube.mesh[16] = { Vector3{ -0.5f, 0.5f, -0.5f }, Vector3{ 0, 1, 0 }, Vector2{ 0, 1 } };
-	cube.mesh[17] = { Vector3{ -0.5f, 0.5f, 0.5f }, Vector3{ 0, 1, 0 }, Vector2{ 0, 0 } };
-	cube.mesh[18] = { Vector3{ 0.5f, 0.5f, 0.5f }, Vector3{ 0, 1, 0 }, Vector2{ 1, 0 } };
-	cube.mesh[19] = { Vector3{ 0.5f, 0.5f, -0.5f }, Vector3{ 0, 1, 0 }, Vector2{ 1, 1 } };
-	cube.mesh[20] = { Vector3{ -0.5f, -0.5f, 0.5f }, Vector3{ 0, -1, 0 }, Vector2{ 0, 1 } };
-	cube.mesh[21] = { Vector3{ -0.5f, -0.5f, -0.5f }, Vector3{ 0, -1, 0 }, Vector2{ 0, 0 } };
-	cube.mesh[22] = { Vector3{ 0.5f, -0.5f, -0.5f }, Vector3{ 0, -1, 0 }, Vector2{ 1, 0 } };
-	cube.mesh[23] = { Vector3{ 0.5f, -0.5f, 0.5f }, Vector3{ 0, -1, 0 }, Vector2{ 1, 1 } };
+	cube.mesh[0] =	{ Vector4{ -0.5f, -0.5f, -0.5f, 1 }, Vector3{ 0, 0, -1 }, Vector2{ 0, 1 } };
+	cube.mesh[1] =	{ Vector4{ -0.5f, 0.5f, -0.5f, 1 }, Vector3{ 0, 0, -1 }, Vector2{ 0, 0 } };
+	cube.mesh[2] =	{ Vector4{ 0.5f, 0.5f, -0.5f, 1 }, Vector3{ 0, 0, -1 }, Vector2{ 1, 0 } };
+	cube.mesh[3] =	{ Vector4{ 0.5f, -0.5f, -0.5f, 1 }, Vector3{ 0, 0, -1 }, Vector2{ 1, 1 } };
+	cube.mesh[4] =	{ Vector4{ -0.5f, -0.5f, 0.5f, 1 }, Vector3{ -1, 0, 0 }, Vector2{ 0, 1 } };
+	cube.mesh[5] =	{ Vector4{ -0.5f, 0.5f, 0.5f, 1 }, Vector3{ -1, 0, 0 }, Vector2{ 0, 0 } };
+	cube.mesh[6] =	{ Vector4{ -0.5f, 0.5f, -0.5f, 1 }, Vector3{ -1, 0, 0 }, Vector2{ 1, 0 } };
+	cube.mesh[7] =	{ Vector4{ -0.5f, -0.5f, -0.5f, 1 }, Vector3{ -1, 0, 0 }, Vector2{ 1, 1 } };
+	cube.mesh[8] =	{ Vector4{ 0.5f, -0.5f, 0.5f, 1 }, Vector3{ 0, 0, 1 }, Vector2{ 0, 1 } };
+	cube.mesh[9] =	{ Vector4{ 0.5f, 0.5f, 0.5f, 1 }, Vector3{ 0, 0, 1 }, Vector2{ 0, 0 } };
+	cube.mesh[10] = { Vector4{ -0.5f, 0.5f, 0.5f, 1 }, Vector3{ 0, 0, 1 }, Vector2{ 1, 0 } };
+	cube.mesh[11] = { Vector4{ -0.5f, -0.5f, 0.5f, 1 }, Vector3{ 0, 0, 1 }, Vector2{ 1, 1 } };
+	cube.mesh[12] = { Vector4{ 0.5f, -0.5f, -0.5f, 1 }, Vector3{ 1, 0, 0 }, Vector2{ 0, 1 } };
+	cube.mesh[13] = { Vector4{ 0.5f, 0.5f, -0.5f, 1 }, Vector3{ 1, 0, 0 }, Vector2{ 0, 0 } };
+	cube.mesh[14] = { Vector4{ 0.5f, 0.5f, 0.5f, 1 }, Vector3{ 1, 0, 0 }, Vector2{ 1, 0 } };
+	cube.mesh[15] = { Vector4{ 0.5f, -0.5f, 0.5f, 1 }, Vector3{ 1, 0, 0 }, Vector2{ 1, 1 } };
+	cube.mesh[16] = { Vector4{ -0.5f, 0.5f, -0.5f, 1 }, Vector3{ 0, 1, 0 }, Vector2{ 0, 1 } };
+	cube.mesh[17] = { Vector4{ -0.5f, 0.5f, 0.5f, 1 }, Vector3{ 0, 1, 0 }, Vector2{ 0, 0 } };
+	cube.mesh[18] = { Vector4{ 0.5f, 0.5f, 0.5f, 1 }, Vector3{ 0, 1, 0 }, Vector2{ 1, 0 } };
+	cube.mesh[19] = { Vector4{ 0.5f, 0.5f, -0.5f, 1 }, Vector3{ 0, 1, 0 }, Vector2{ 1, 1 } };
+	cube.mesh[20] = { Vector4{ -0.5f, -0.5f, 0.5f, 1 }, Vector3{ 0, -1, 0 }, Vector2{ 0, 1 } };
+	cube.mesh[21] = { Vector4{ -0.5f, -0.5f, -0.5f, 1 }, Vector3{ 0, -1, 0 }, Vector2{ 0, 0 } };
+	cube.mesh[22] = { Vector4{ 0.5f, -0.5f, -0.5f, 1 }, Vector3{ 0, -1, 0 }, Vector2{ 1, 0 } };
+	cube.mesh[23] = { Vector4{ 0.5f, -0.5f, 0.5f, 1 }, Vector3{ 0, -1, 0 }, Vector2{ 1, 1 } };
 	cube.totalIndices = 36;
 	cube.indices = new int[cube.totalIndices]
 	{
@@ -600,18 +600,17 @@ void SRDrawWireFrame(Canvas canvas, Object object, RGB color)
 		Vector2 points[3];
 		for (int j = 0; j < 3; ++j)
 		{
-			Vector3 current = object.mesh[object.indices[i + j]].position;
-			Vector4 v4Current = { current.x, current.y, current.z, 1 };
+			Vector4 current = object.mesh[object.indices[i + j]].position;
 			//Transform object space to world space
-			v4Current = v4mul(v4Current, world);
+			current = v4mul(current, world);
 			//Transform world space to view space
-			v4Current = v4mul(v4Current, _view);
+			current = v4mul(current, _view);
 			//Transform view space to projection space
-			v4Current = v4mul(v4Current, _projection);
+			current = v4mul(current, _projection);
 			//Transform homogeneous coordinates to point coordinates
-			v4Current = v4div(v4Current, v4Current.w);
+			current = v4div(current, current.w);
 			//Transform projection space to canvas space
-			points[j] = Vector2{ (v4Current.x + 1) / 2.0f * _width, (v4Current.y + 1) / 2.0f * _height};
+			points[j] = Vector2{ (current.x + 1) / 2.0f * _width, (current.y + 1) / 2.0f * _height};
 		}
 		if (!SRIsBackface(points))
 		{
@@ -738,7 +737,7 @@ bool SRIsBackface(Vector3* points)
 	return first.x * second.y < first.y * second.x;
 }
 
-void SRRasterize(Canvas canvas, Vertex4* triangle)
+void SRRasterize(Canvas canvas, Vertex* triangle)
 {
 	int topVertex = triangle[0].position.y < triangle[1].position.y ? 0 : 1;
 	topVertex = triangle[topVertex].position.y < triangle[2].position.y ? topVertex : 2;
@@ -863,29 +862,28 @@ void SRDrawObject(Canvas canvas, Object object)
 	for (int i = 0; i < object.totalIndices - 2; i += 3)
 	{
 		Vector3 points[3];
-		Vertex4 vertices[3];
+		Vertex vertices[3];
 		for (int j = 0; j < 3; ++j)
 		{
-			Vector3 current = object.mesh[object.indices[i + j]].position;
-			Vector4 v4Current = { current.x, current.y, current.z, 1 };
+			Vector4 current = object.mesh[object.indices[i + j]].position;
 			//Transform object space to world space
-			v4Current = v4mul(v4Current, world);
+			current = v4mul(current, world);
 			//Transform world space to view space
-			v4Current = v4mul(v4Current, _view);
+			current = v4mul(current, _view);
 			//Transform view space to projection space
-			v4Current = v4mul(v4Current, _projection);
+			current = v4mul(current, _projection);
 			//Transform homogeneous coordinates to point coordinates
-			v4Current.x /= v4Current.w;
-			v4Current.y /= v4Current.w;
-			v4Current.z /= v4Current.w;
+			current.x /= current.w;
+			current.y /= current.w;
+			current.z /= current.w;
 			//Primitive assembly
-			points[j] = Vector3{ v4Current.x, v4Current.y, v4Current.z };
+			points[j] = Vector3{ current.x, current.y, current.z };
 			vertices[j].position = Vector4
 			{ 
-				(v4Current.x + 1) / 2.0f * _width,
-				(v4Current.y + 1) / 2.0f * _height,
-				v4Current.z,
-				v4Current.w
+				(current.x + 1) / 2.0f * _width,
+				(current.y + 1) / 2.0f * _height,
+				current.z,
+				current.w
 			};
 			vertices[j].normal = object.mesh[object.indices[i + j]].normal;
 			vertices[j].texcoord = object.mesh[object.indices[i + j]].texcoord;
