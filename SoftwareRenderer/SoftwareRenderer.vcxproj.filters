@@ -19,6 +19,9 @@
     <Filter Include="源文件\Renderer">
       <UniqueIdentifier>{0e33a984-9731-4b73-b05d-a720fd626b43}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\Utils">
+      <UniqueIdentifier>{4935eb8c-f2e0-4c0e-bba8-f4f7955d6596}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -31,7 +34,7 @@
       <Filter>源文件\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="MathHelper.cpp">
-      <Filter>源文件\Renderer</Filter>
+      <Filter>源文件\Utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -9,7 +9,7 @@ public:
 	virtual void Initialize() = 0;
 	virtual void Render(HDC hdc, float dt) = 0;
 private:
-	RenderBoard(const RenderBoard&);
-	RenderBoard& operator=(const RenderBoard&);
+	RenderBoard(const RenderBoard&) = delete;
+	RenderBoard& operator=(const RenderBoard&) = delete;
 };
 #endif
