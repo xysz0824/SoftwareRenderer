@@ -1,5 +1,5 @@
-#ifndef  _SYSTEMWINDOW
-#define _SYSTEMWINDOW
+#ifndef _SYSTEM_WINDOW_H
+#define _SYSTEM_WINDOW_H
 #include <Windows.h>
 #include "Graphics.h"
 

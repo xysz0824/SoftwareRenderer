@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <assert.h>
-#include "MathHelper.h"
 #include "SystemWindow.h"
 #include "SoftwareRenderer.h"
 
