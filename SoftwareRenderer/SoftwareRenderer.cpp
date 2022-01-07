@@ -414,8 +414,8 @@ Matrix SRCreateTranslation(Vector3 position)
 
 Matrix SRCreateRotateX(float angle)
 {
-	float c = cos(angle);
-	float s = sin(angle);
+	float c = (float)cos(angle);
+	float s = (float)sin(angle);
 	Matrix rotate = 
 	{
 		1, 0, 0, 0,
@@ -428,8 +428,8 @@ Matrix SRCreateRotateX(float angle)
 
 Matrix SRCreateRotateY(float angle)
 {
-	float c = cos(angle);
-	float s = sin(angle);
+	float c = (float)cos(angle);
+	float s = (float)sin(angle);
 	Matrix rotate =
 	{
 		c, 0,-s, 0,
@@ -442,8 +442,8 @@ Matrix SRCreateRotateY(float angle)
 
 Matrix SRCreateRotateZ(float angle)
 {
-	float c = cos(angle);
-	float s = sin(angle);
+	float c = (float)cos(angle);
+	float s = (float)sin(angle);
 	Matrix rotate =
 	{
 		c, s, 0, 0,
@@ -500,7 +500,7 @@ Matrix SRCreateViewAtLH(Vector3 position, Vector3 target, Vector3 up)
 
 Matrix SRCreatePerspectiveLH(float fieldofView, float aspectRadio, float zNear, float zFar)
 {
-	float ys = 1.0f / tan(fieldofView / 2.0f);
+	float ys = 1.0f / (float)tan(fieldofView / 2.0f);
 	float xs = ys / aspectRadio;
 	float za = zFar / (zFar - zNear);
 	float zb = (zNear * zFar) / (zNear - zFar);

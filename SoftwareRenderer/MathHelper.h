@@ -27,7 +27,7 @@ inline float v3dot(Vector3 a, Vector3 b)
 }
 inline Vector3 v3normalize(Vector3 v)
 {
-	float length = sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+	float length = (float)sqrt((double)v.x * v.x + (double)v.y * v.y + (double)v.z * v.z);
 	return length == 0.0f ? v : Vector3{ v.x / length, v.y / length, v.z / length };
 }
 
@@ -40,7 +40,7 @@ struct Matrix {
 			float	_21, _22, _23, _24;
 			float	_31, _32, _33, _34;
 			float	_41, _42, _43, _44;
-		};
+		} m;
 		float e[4][4];
 	};
 };
@@ -57,12 +57,12 @@ inline Vector4 v4div(Vector4 v, float n)
 	return Vector4{ v.x / n, v.y / n, v.z / n, v.w / n };
 }
 
-inline double deg2rad(double degree)
+inline float deg2rad(float degree)
 {
-	return degree / 180.0f * M_PI;
+	return (float)(degree / 180.0f * M_PI);
 }
-inline double rad2deg(double radian)
+inline float rad2deg(float radian)
 {
-	return radian / M_PI * 180.0f;
+	return (float)(radian / M_PI * 180.0f);
 }
 #endif
