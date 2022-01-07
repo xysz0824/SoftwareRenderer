@@ -22,6 +22,18 @@
     <Filter Include="源文件\Utils">
       <UniqueIdentifier>{4935eb8c-f2e0-4c0e-bba8-f4f7955d6596}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\Utils">
+      <UniqueIdentifier>{1f92675c-ec28-4706-85af-90d81bdead01}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Abstract">
+      <UniqueIdentifier>{e2fde41b-247a-41bc-a1c1-6638c03c6fdf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Windows">
+      <UniqueIdentifier>{6a4bcbf9-53d9-445b-aaa4-84bb145145e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Windows">
+      <UniqueIdentifier>{30478e19-0e9d-4c27-806d-0ca2ce93c79b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -36,19 +48,28 @@
     <ClCompile Include="MathHelper.cpp">
       <Filter>源文件\Utils</Filter>
     </ClCompile>
+    <ClCompile Include="Graphics.cpp">
+      <Filter>源文件\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="SystemWindow.cpp">
+      <Filter>源文件\Windows</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MyBoard.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="RenderBoard.h">
-      <Filter>头文件\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="SoftwareRenderer.h">
       <Filter>头文件\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="MathHelper.h">
-      <Filter>头文件\Renderer</Filter>
+      <Filter>头文件\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderBoard.h">
+      <Filter>头文件\Abstract</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemWindow.h">
+      <Filter>头文件\Windows</Filter>
     </ClInclude>
     <ClInclude Include="Graphics.h">
       <Filter>头文件\Renderer</Filter>

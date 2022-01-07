@@ -11,10 +11,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MathHelper.cpp" />
     <ClCompile Include="MyBoard.cpp" />
     <ClCompile Include="SoftwareRenderer.cpp" />
+    <ClCompile Include="SystemWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Graphics.h" />
@@ -22,6 +24,7 @@
     <ClInclude Include="MyBoard.h" />
     <ClInclude Include="RenderBoard.h" />
     <ClInclude Include="SoftwareRenderer.h" />
+    <ClInclude Include="SystemWindow.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{5AD7F870-E214-47BE-8157-451B56E9FB2F}</ProjectGuid>

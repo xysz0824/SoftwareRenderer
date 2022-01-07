@@ -1,9 +1,10 @@
+#include "SystemWindow.h"
 #include "MyBoard.h"
 
 int WINAPI Main()
 {
-	HWND hwnd = SRCreateWindow(hInstance, "Software Renderer", 800, 600);
+	HWND hwnd = SWCreateWindow(hInstance, "Software Renderer", 800, 600);
 	RenderBoard* board = new MyBoard;
-	SRSetRenderBoard(board);
-	return SRRunWindow(hwnd, nCmdShow);
+	SWSetRenderBoard(board);
+	return SWRunWindow(hwnd, nCmdShow);
 }
